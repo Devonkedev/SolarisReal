@@ -86,6 +86,8 @@ const BottomNavigation = () => {
       // activeColor="#e91e63"
       // inactiveColor="#95a5a6"
       // barStyle={{ backgroundColor: '#ffffff' }}
+      shifting={false}
+      barStyle={{ height: 80, paddingBottom: 4 }}
     >
       <Tab.Screen
         name="Prescription"

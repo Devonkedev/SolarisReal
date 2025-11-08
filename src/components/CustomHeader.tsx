@@ -14,7 +14,7 @@ const CustomHeader = ({ label, subheading, image_url }) => {
           width: wp(100),
           height: hp(10),
           position: 'relative',
-          backgroundColor: 'skyblue',
+          backgroundColor: 'warmorange',
         }}>
           {/* PHOTO */}
           <View style={{
