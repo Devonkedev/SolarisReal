@@ -23,7 +23,6 @@ const ProfileScreen = ({ navigation }) => {
   const [profileData, setProfileData] = useState({
     name: '',
     email: '', 
-     
     dob: '',
     phone: '',
     // gender: '',

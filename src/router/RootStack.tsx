@@ -147,6 +147,14 @@ const RootStack = () => {
       {user ? <BottomNavigation /> : <AuthStack />}
     </View>
   );
+
+  // const user = { uid: "mockUser", email: "test@example.com" };
+
+  // return (
+  //   <View style={{ flex: 1 }}>
+  //     <BottomNavigation />
+  //   </View>
+  //   );
 };
 
 export default RootStack;
