@@ -8,8 +8,8 @@ import ProfileScreen from '../screens/profile/ProfileScreen';
 import SubsidyEligibilityScreen from '../screens/subsidy/SubsidyEligibilityScreen';
 import SubsidyResultsScreen from '../screens/subsidy/SubsidyResultsScreen';
 import TrackerScreen from '../screens/tracker/TrackerScreen';
-import PrescriptionScreen from '../screens/prescription/PrescriptionScreen';
-import AddPrescriptionScreen from '../screens/prescription/AddPrescriptionScreen';
+import ProjectsScreen from '../screens/projects/ProjectsScreen';
+import AddProjectScreen from '../screens/projects/AddProjectScreen';
 import MapScreen from '../screens/map/HealthScreen';
 import AddTrackerScreen from '../screens/tracker/AddTrackerScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
@@ -42,15 +42,14 @@ const MapStack = () => {
   );
 };
 
-// const PrescriptionStack = () => {
-//   return (
-//   <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
-//       <Stack.Screen name="PrescriptionScreen" component={PrescriptionScreen} />
-//       <Stack.Screen name="AddPrescriptionScreen" component={AddPrescriptionScreen} />
-//       {/* Add other auth screens here if needed */}
-//     </Stack.Navigator>
-//   );
-// }
+const ProjectsStack = () => {
+  return (
+    <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="ProjectsScreen" component={ProjectsScreen} />
+      <Stack.Screen name="AddProjectScreen" component={AddProjectScreen} />
+    </Stack.Navigator>
+  );
+};
 
 const SubsidyStack = () => {
   return (
@@ -102,6 +101,18 @@ const BottomNavigation = () => {
           ),
         }}
       />
+
+<Tab.Screen
+        name="Projects"
+        component={ProjectsStack}
+        options={{
+          tabBarLabel: 'Projects',
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="clipboard-text" color={color} size={26} />
+          ),
+        }}
+      />
+      
       <Tab.Screen
         name="Tracker"
         component={TrackerStack}
@@ -122,6 +133,7 @@ const BottomNavigation = () => {
           ),
         }}
       />
+
       <Tab.Screen
         name="Profile"
         component={ProfileStack}

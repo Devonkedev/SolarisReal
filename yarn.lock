@@ -3529,9 +3529,9 @@ expo-keep-awake@~15.0.7:
   integrity sha512-CgBNcWVPnrIVII5G54QDqoE125l+zmqR4HR8q+MQaCfHet+dYpS5vX5zii/RMayzGN4jPgA4XYIQ28ePKFjHoA==
 
 expo-linear-gradient@~13.0.3:
-  version "13.0.3-canary-20240719-83ee47b"
-  resolved "https://registry.yarnpkg.com/expo-linear-gradient/-/expo-linear-gradient-13.0.3-canary-20240719-83ee47b.tgz#6cf6d9c5626b68028659fc6c0ef120093913136d"
-  integrity sha512-HKz5qbNnp4huZlcI5cS6EYWSoVKoB1gnLzY4IshamRv+9pql2FpHkohZrRMTxIniE9xFh66yl1EK004sP1gCrw==
+  version "15.0.8-canary-20251031-b135dff"
+  resolved "https://registry.yarnpkg.com/expo-linear-gradient/-/expo-linear-gradient-15.0.8-canary-20251031-b135dff.tgz#5d1262febf878b633a9b4dc42af3f644b7ae900c"
+  integrity sha512-o/hY8/wUeHJRMRoV34xLUp4pvIBg42+0PY6pxr63B6uVqHm4EGTN1tCLoQfIaR5Tm3O6WWRlfetdh95HO/JcMw==
 
 expo-modules-autolinking@3.0.21:
   version "3.0.21"

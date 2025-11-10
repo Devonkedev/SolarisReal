@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Alert, Image, Platform, TouchableOpacity, View 
 import { Text, Menu, TextInput as PaperTextInput } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
-import { addPrescription } from '../../config/firebase';
+import { addProject } from '../../config/firebase';
 import CustomHeader from '../../components/CustomHeader';
 import AppTextInput from '../../components/AppTextInput';
 import AppButton from '../../components/AppButton';
@@ -19,7 +19,7 @@ const OPTIONS = [
 
 type Props = { navigation: any };
 
-const AddPrescriptionScreen: React.FC<Props> = ({ navigation }) => {
+const AddProjectScreen: React.FC<Props> = ({ navigation }) => {
   const [name, setName] = useState('');
   const [installer, setInstaller] = useState('');
   const [detail, setDetail] = useState('');
@@ -101,22 +101,18 @@ const AddPrescriptionScreen: React.FC<Props> = ({ navigation }) => {
     setLoading(true);
     try {
       const payload: any = {
-        // legacy fields
         name: name.trim(),
-        doctor: installer.trim(),
         detail: detail.trim(),
-        type,
-        imageBase64,
-        // solar-friendly aliases
-        installer: installer.trim(),
-        description: detail.trim(),
         systemType: type,
+        type,
+        installer: installer.trim(),
+        imageBase64,
         sitePhotoBase64: imageBase64,
         installationDate: installationDate.toISOString(),
         createdAt: new Date(),
       };
-      await addPrescription(payload);
-      Alert.alert('Success', 'Project saved!', [{ text: 'OK', onPress: () => navigation.navigate('PrescriptionScreen') }]);
+      await addProject(payload);
+      Alert.alert('Success', 'Project saved!', [{ text: 'OK', onPress: () => navigation.navigate('ProjectsScreen') }]);
     } catch (err) {
       console.error('Error saving project:', err);
       Alert.alert('Error', 'Something went wrong while saving the project.');
@@ -224,12 +220,22 @@ const AddPrescriptionScreen: React.FC<Props> = ({ navigation }) => {
         >
           Save project
         </AppButton>
+
+        <AppButton
+          mode="contained"
+          loading={loading}
+          onPress={() => navigation.navigate('ProjectsScreen')}
+          disabled={loading}
+          icon="arrow-left"
+        >
+          Go Back
+        </AppButton>
       </View>
     </ScrollView>
   );
 };
 
-export default AddPrescriptionScreen;
+export default AddProjectScreen;
 
 const styles = StyleSheet.create({
   card: {

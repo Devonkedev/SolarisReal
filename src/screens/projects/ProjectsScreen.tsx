@@ -2,48 +2,10 @@ import { Alert, Image, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Avatar, FAB, List, Surface, Text, Portal, Modal } from 'react-native-paper'
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen'
-import { getPrescriptions, logout } from '../../config/firebase'
+import { getProjects } from '../../config/firebase'
 import LogoutButton from '../../components/LogoutButton'
 import CustomJuniorHeader from '../../components/CustomJuniorHeader'
-
-const CustomHeader = () => {
-  return (
-    <View style={{
-      gap: wp(10),
-      justifyContent: 'center',
-      alignItems: 'center',
-    }}>
-      <Surface style={{
-        width: wp(100),
-        height: hp(10),
-        position: 'relative',
-        backgroundColor: '#FFD54F',
-      }}>
-        {/* PHOTO */}
-        <View style={{
-          width: wp(20),
-          height: wp(20),
-          backgroundColor: 'white',
-          borderRadius: wp(20),
-          position: 'absolute',
-          left: wp(40),
-          top: hp(4),
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
-          <Avatar.Image size={wp(18)} source={{ uri: 'https://i.postimg.cc/CLkyNwZT/Screenshot-2025-11-10-at-5-03-23-PM.png' }} />
-        </View>
-      </Surface>
-      <View>
-        <Text variant="titleLarge" style={{ textAlign: 'center' }}>Solar Projects</Text>
-        <Text variant="titleMedium" style={{ textAlign: 'center' }}>
-          Manage your rooftop solar installations
-        </Text>
-      </View>
-    </View>
-  )
-}
-
+import CustomHeader from '../../components/CustomHeader'
 
 const CustomListCard = ({ data, onPress }) => {
   return (
@@ -69,7 +31,7 @@ const CustomListCard = ({ data, onPress }) => {
         <Text variant="titleMedium">{data.name || 'Unnamed Project'}</Text>
         <Text variant="bodySmall">{data.detail || 'No description'}</Text>
       </View>
-      <Text style={{ fontWeight: 'bold' }}>{data.type || 'System'}</Text>
+      <Text style={{ fontWeight: 'bold' }}>{data.systemType || data.type || 'System'}</Text>
     </Surface>
   );
 };
@@ -77,15 +39,15 @@ const CustomListCard = ({ data, onPress }) => {
 
 
 
-const PrescriptionScreen = ({ navigation }) => {
-  const [prescriptions, setPrescriptions] = useState([])
+const ProjectsScreen = ({ navigation }) => {
+  const [projects, setProjects] = useState([])
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPrescription, setSelectedPrescription] = useState(null);
+  const [selectedProject, setSelectedProject] = useState(null);
 
-  const fetchPrescriptions = async () => {
+  const fetchProjects = async () => {
     try {
-      const data = await getPrescriptions();
-      setPrescriptions(data); // your state
+      const data = await getProjects();
+      setProjects(data); // your state
     } catch (err) {
       Alert.alert('Error', err.message);
     }
@@ -93,21 +55,21 @@ const PrescriptionScreen = ({ navigation }) => {
 
 
   const openModal = (item) => {
-    setSelectedPrescription(item);
+    setSelectedProject(item);
     setModalVisible(true);
   };
 
   const closeModal = () => {
     setModalVisible(false);
-    setSelectedPrescription(null);
+    setSelectedProject(null);
   };
 
 
 
   useEffect(() => {
-    fetchPrescriptions();
+    fetchProjects();
     return (
-      setPrescriptions([])
+      setProjects([])
     )
   }, []);
 
@@ -115,7 +77,7 @@ const PrescriptionScreen = ({ navigation }) => {
 
 
   const handlePress = () => {
-    navigation.navigate("AddPrescriptionScreen")
+    navigation.navigate("AddProjectScreen")
   }
 
   return (
@@ -123,13 +85,17 @@ const PrescriptionScreen = ({ navigation }) => {
       flex: 1,
     }}>
 
-      <CustomHeader />
+      <CustomHeader
+        label="Solar Projects"
+        subheading="Manage your rooftop solar installations"
+        image_url="https://i.postimg.cc/CLkyNwZT/Screenshot-2025-11-10-at-5-03-23-PM.png"
+      />
 
       <List.Section>
-  <CustomJuniorHeader label={'Solar Projects'} action={() => { }} />
+        <CustomJuniorHeader label={'Solar Projects'} action={() => { }} />
         {
-          prescriptions && prescriptions.length > 0 ? (
-            prescriptions.map((item) => (
+          projects && projects.length > 0 ? (
+            projects.map((item) => (
               <CustomListCard key={item.id} data={item} onPress={() => openModal(item)} />
             ))
           ) : (
@@ -149,14 +115,9 @@ const PrescriptionScreen = ({ navigation }) => {
 
 
 
+      <LogoutButton />
 
-
-
-
-      {/* ADD PRESCRIPTION */}
-  <LogoutButton />
-
-      {/* ADD PRESCRIPTION */}
+      {/* ADD PROJECT */}
       <FAB
         icon="solar-power"
         style={{
@@ -177,9 +138,9 @@ const PrescriptionScreen = ({ navigation }) => {
           margin: 20,
           borderRadius: 12,
         }}>
-          {selectedPrescription && (
+          {selectedProject && (
             <>
-              {selectedPrescription.imageBase64 ? (
+              {selectedProject.imageBase64 ? (
                 <Image
                   style={{
                     width: wp(80),
@@ -188,7 +149,7 @@ const PrescriptionScreen = ({ navigation }) => {
                     borderRadius: 12,
                     resizeMode: 'contain',
                   }}
-                  source={{ uri: selectedPrescription.imageBase64 }}
+                  source={{ uri: selectedProject.imageBase64 }}
                 />
               ) : (
                 <Avatar.Icon
@@ -199,13 +160,13 @@ const PrescriptionScreen = ({ navigation }) => {
               )}
 
               <Text variant="titleLarge" style={{ marginTop: 16 }}>
-                {selectedPrescription.name}
+                {selectedProject.name}
               </Text>
               <Text variant="bodyMedium">
-                {selectedPrescription.detail}
+                {selectedProject.detail}
               </Text>
               <Text variant="bodySmall" style={{ marginTop: 8, color: 'gray' }}>
-                {selectedPrescription.type}
+                {selectedProject.systemType || selectedProject.type}
               </Text>
             </>
           )}
@@ -215,4 +176,4 @@ const PrescriptionScreen = ({ navigation }) => {
   )
 }
 
-export default PrescriptionScreen
+export default ProjectsScreen
