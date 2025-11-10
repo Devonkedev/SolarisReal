@@ -17,7 +17,7 @@ const CustomHeader = () => {
         width: wp(100),
         height: hp(10),
         position: 'relative',
-        backgroundColor: 'skyblue',
+        backgroundColor: '#FFD54F',
       }}>
         {/* PHOTO */}
         <View style={{
@@ -35,9 +35,9 @@ const CustomHeader = () => {
         </View>
       </Surface>
       <View>
-        <Text variant="titleLarge" style={{ textAlign: 'center' }}>Prescriptions</Text>
+        <Text variant="titleLarge" style={{ textAlign: 'center' }}>Solar Projects</Text>
         <Text variant="titleMedium" style={{ textAlign: 'center' }}>
-          Here you can add your prescriptions
+          Manage your rooftop solar installations
         </Text>
       </View>
     </View>
@@ -66,10 +66,10 @@ const CustomListCard = ({ data, onPress }) => {
         )
       }
       <View style={{ flex: 1 }}>
-        <Text variant="titleMedium">{data.name || 'NA'}</Text>
-        <Text variant="bodySmall">{data.detail || 'NA'}</Text>
+        <Text variant="titleMedium">{data.name || 'Unnamed Project'}</Text>
+        <Text variant="bodySmall">{data.detail || 'No description'}</Text>
       </View>
-      <Text style={{ fontWeight: 'bold' }}>{data.type || 'NA'}</Text>
+      <Text style={{ fontWeight: 'bold' }}>{data.type || 'System'}</Text>
     </Surface>
   );
 };
@@ -126,7 +126,7 @@ const PrescriptionScreen = ({ navigation }) => {
       <CustomHeader />
 
       <List.Section>
-        <CustomJuniorHeader label={'Prescriptions'} action={() => { }} />
+  <CustomJuniorHeader label={'Solar Projects'} action={() => { }} />
         {
           prescriptions && prescriptions.length > 0 ? (
             prescriptions.map((item) => (
@@ -154,11 +154,11 @@ const PrescriptionScreen = ({ navigation }) => {
 
 
       {/* ADD PRESCRIPTION */}
-      <LogoutButton />
+  <LogoutButton />
 
       {/* ADD PRESCRIPTION */}
       <FAB
-        icon="plus"
+        icon="solar-power"
         style={{
           position: 'absolute',
           margin: 16,

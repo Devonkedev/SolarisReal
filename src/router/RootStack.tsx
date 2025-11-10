@@ -5,6 +5,8 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from '../screens/auth/LoginScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
+import SubsidyEligibilityScreen from '../screens/subsidy/SubsidyEligibilityScreen';
+import SubsidyResultsScreen from '../screens/subsidy/SubsidyResultsScreen';
 import ReminderScreen from '../screens/reminder/ReminderScreen';
 import PrescriptionScreen from '../screens/prescription/PrescriptionScreen';
 import AddPrescriptionScreen from '../screens/prescription/AddPrescriptionScreen';
@@ -22,6 +24,7 @@ const Stack = createStackNavigator();
 const AuthStack = () => {
   return (
     <Stack.Navigator
+      id="AuthStack"
       screenOptions={{ headerShown: false }}
     >
       <Stack.Screen name="LoginScreen" component={LoginScreen} />
@@ -35,6 +38,7 @@ const AuthStack = () => {
 const HealthStack = () => {
   return (
     <Stack.Navigator
+      id="HealthStack"
       screenOptions={{ headerShown: false }}
     >
       <Stack.Screen name="HealthScreen" component={HealthScreen} />
@@ -47,6 +51,7 @@ const HealthStack = () => {
 const PrescriptionStack = () => {
   return (
     <Stack.Navigator
+      id="PrescriptionStack"
       screenOptions={{ headerShown: false }}
     >
       <Stack.Screen name="PrescriptionScreen" component={PrescriptionScreen} />
@@ -55,9 +60,19 @@ const PrescriptionStack = () => {
     </Stack.Navigator>
   );
 }
+
+const SubsidyStack = () => {
+  return (
+    <Stack.Navigator id="SubsidyStack" screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="SubsidyEligibility" component={SubsidyEligibilityScreen} />
+      <Stack.Screen name="SubsidyResults" component={SubsidyResultsScreen} />
+    </Stack.Navigator>
+  );
+};
 const ReminderStack = () => {
   return (
     <Stack.Navigator
+      id="ReminderStack"
       screenOptions={{ headerShown: false }}
     >
       <Stack.Screen name="ReminderScreen" component={ReminderScreen} />
@@ -70,19 +85,22 @@ const ReminderStack = () => {
 const ProfileStack = () => {
   return (
     <Stack.Navigator
+      id="ProfileStack"
       screenOptions={{ headerShown: false }}
     >
       <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+      <Stack.Screen name="SubsidyEligibility" component={SubsidyEligibilityScreen} />
+      <Stack.Screen name="SubsidyResults" component={SubsidyResultsScreen} />
       <Stack.Screen name="EditProfile" component={EditProfile} />
-      {/* Add other auth screens here if needed */}
-    </Stack.Navigator>
+      {/* Add otherauth screens here if needed */}
+    </Stack.Navigator >
   );
 }
 
 const BottomNavigation = () => {
   return (
     <Tab.Navigator
-      initialRouteName="Prescription"
+    initialRouteName="Prescription"
       // activeColor="#e91e63"
       // inactiveColor="#95a5a6"
       // barStyle={{ backgroundColor: '#ffffff' }}
@@ -90,12 +108,12 @@ const BottomNavigation = () => {
       barStyle={{ height: 80, paddingBottom: 4 }}
     >
       <Tab.Screen
-        name="Prescription"
-        component={PrescriptionStack}
+        name="Solar"
+        component={SubsidyStack}
         options={{
-          tabBarLabel: 'Prescriptions',
+          tabBarLabel: 'Solar Subsidy',
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="pill" color={color} size={26} />
+            <MaterialCommunityIcons name="solar-power" color={color} size={26} />
           ),
         }}
       />

@@ -100,7 +100,8 @@ const ProfileScreen = ({ navigation }) => {
           ))}
         </View>
 
-        <Button onPress={() => auth.signOut()}> Logout </Button>
+  <Button onPress={() => navigation.navigate('SubsidyEligibility')}> Check Solar Subsidy </Button>
+  <Button onPress={() => auth.signOut()}> Logout </Button>
       </ScrollView>
       <FAB
         icon="pen"

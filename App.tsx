@@ -26,7 +26,7 @@ export default function App() {
 
   useEffect(() => {
     const setupNotifications = async () => {
-      const granted = await initializeNotifications(); // <--- IMPORTANT
+      const granted = await initializeNotifications(); 
       if (!granted) {
         console.warn("Notification permission not granted");
         return;
