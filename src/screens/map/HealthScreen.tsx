@@ -12,6 +12,7 @@ type SolarHeatTile = {
   value: number;
 };
 
+
 const SOLAR_COLOR_STOPS = [
   { value: 0, color: [37, 52, 148] },
   { value: 0.35, color: [68, 130, 195] },
