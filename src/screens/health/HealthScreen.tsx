@@ -130,8 +130,9 @@ const HealthScreen = ({ navigation }) => {
           }
         />
 
-        <CustomJuniorHeader label={'Shadow Visualization'} action={() => {}} />
-        <ShadowMapSection apiKey={apiKey} />
+  <CustomJuniorHeader label={'Shadow Visualization'} action={() => {}} />
+  {/* pass a date so ShadowMapSection has the required prop */}
+  <ShadowMapSection apiKey={apiKey} date={new Date()} />
 
         <View style={{ marginVertical: hp(2), paddingHorizontal: wp(3) }}>
           <Text variant="bodyMedium">

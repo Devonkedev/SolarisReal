@@ -23,10 +23,7 @@ const Stack = createStackNavigator();
 
 const AuthStack = () => {
   return (
-    <Stack.Navigator
-      id="AuthStack"
-      screenOptions={{ headerShown: false }}
-    >
+  <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
       <Stack.Screen name="LoginScreen" component={LoginScreen} />
       <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
       {/* Add other auth screens here if needed */}
@@ -37,10 +34,7 @@ const AuthStack = () => {
 
 const HealthStack = () => {
   return (
-    <Stack.Navigator
-      id="HealthStack"
-      screenOptions={{ headerShown: false }}
-    >
+  <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
       <Stack.Screen name="HealthScreen" component={HealthScreen} />
       <Stack.Screen name="AddHealthDataScreen" component={AddHealthDataScreen} />
       {/* Add other auth screens here if needed */}
@@ -48,22 +42,19 @@ const HealthStack = () => {
   );
 };
 
-const PrescriptionStack = () => {
-  return (
-    <Stack.Navigator
-      id="PrescriptionStack"
-      screenOptions={{ headerShown: false }}
-    >
-      <Stack.Screen name="PrescriptionScreen" component={PrescriptionScreen} />
-      <Stack.Screen name="AddPrescriptionScreen" component={AddPrescriptionScreen} />
-      {/* Add other auth screens here if needed */}
-    </Stack.Navigator>
-  );
-}
+// const PrescriptionStack = () => {
+//   return (
+//   <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
+//       <Stack.Screen name="PrescriptionScreen" component={PrescriptionScreen} />
+//       <Stack.Screen name="AddPrescriptionScreen" component={AddPrescriptionScreen} />
+//       {/* Add other auth screens here if needed */}
+//     </Stack.Navigator>
+//   );
+// }
 
 const SubsidyStack = () => {
   return (
-    <Stack.Navigator id="SubsidyStack" screenOptions={{ headerShown: false }}>
+  <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
       <Stack.Screen name="SubsidyEligibility" component={SubsidyEligibilityScreen} />
       <Stack.Screen name="SubsidyResults" component={SubsidyResultsScreen} />
     </Stack.Navigator>
@@ -71,10 +62,7 @@ const SubsidyStack = () => {
 };
 const ReminderStack = () => {
   return (
-    <Stack.Navigator
-      id="ReminderStack"
-      screenOptions={{ headerShown: false }}
-    >
+  <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
       <Stack.Screen name="ReminderScreen" component={ReminderScreen} />
       <Stack.Screen name="AddReminderScreen" component={AddReminderScreen} />
       {/* Add other auth screens here if needed */}
@@ -84,10 +72,7 @@ const ReminderStack = () => {
 
 const ProfileStack = () => {
   return (
-    <Stack.Navigator
-      id="ProfileStack"
-      screenOptions={{ headerShown: false }}
-    >
+  <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
       <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
       <Stack.Screen name="SubsidyEligibility" component={SubsidyEligibilityScreen} />
       <Stack.Screen name="SubsidyResults" component={SubsidyResultsScreen} />
@@ -100,7 +85,7 @@ const ProfileStack = () => {
 const BottomNavigation = () => {
   return (
     <Tab.Navigator
-    initialRouteName="Prescription"
+    initialRouteName="Solar"
       // activeColor="#e91e63"
       // inactiveColor="#95a5a6"
       // barStyle={{ backgroundColor: '#ffffff' }}
