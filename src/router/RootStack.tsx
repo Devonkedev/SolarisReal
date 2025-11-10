@@ -7,16 +7,16 @@ import LoginScreen from '../screens/auth/LoginScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import SubsidyEligibilityScreen from '../screens/subsidy/SubsidyEligibilityScreen';
 import SubsidyResultsScreen from '../screens/subsidy/SubsidyResultsScreen';
-import ReminderScreen from '../screens/reminder/ReminderScreen';
+import TrackerScreen from '../screens/tracker/TrackerScreen';
 import PrescriptionScreen from '../screens/prescription/PrescriptionScreen';
 import AddPrescriptionScreen from '../screens/prescription/AddPrescriptionScreen';
-import HealthScreen from '../screens/health/HealthScreen';
-import AddReminderScreen from '../screens/reminder/AddReminderScreen';
+import MapScreen from '../screens/map/HealthScreen';
+import AddTrackerScreen from '../screens/tracker/AddTrackerScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import EditProfile from '../screens/profile/EditProfileScreen';
-import AddHealthDataScreen from '../screens/health/AddHealthDataScreen';
+import AddHealthDataScreen from '../screens/map/AddHealthDataScreen';
 
 const Tab = createMaterialBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -32,10 +32,10 @@ const AuthStack = () => {
 };
 
 
-const HealthStack = () => {
+const MapStack = () => {
   return (
   <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="HealthScreen" component={HealthScreen} />
+      <Stack.Screen name="MapScreen" component={MapScreen} />
       <Stack.Screen name="AddHealthDataScreen" component={AddHealthDataScreen} />
       {/* Add other auth screens here if needed */}
     </Stack.Navigator>
@@ -60,11 +60,11 @@ const SubsidyStack = () => {
     </Stack.Navigator>
   );
 };
-const ReminderStack = () => {
+const TrackerStack = () => {
   return (
   <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="ReminderScreen" component={ReminderScreen} />
-      <Stack.Screen name="AddReminderScreen" component={AddReminderScreen} />
+      <Stack.Screen name="TrackerScreen" component={TrackerScreen} />
+      <Stack.Screen name="AddTrackerScreen" component={AddTrackerScreen} />
       {/* Add other auth screens here if needed */}
     </Stack.Navigator>
   );
@@ -103,22 +103,22 @@ const BottomNavigation = () => {
         }}
       />
       <Tab.Screen
-        name="Reminders"
-        component={ReminderStack}
+        name="Trackers"
+        component={TrackerStack}
         options={{
-          tabBarLabel: 'Reminders',
+          tabBarLabel: 'Trackers',
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="bell" color={color} size={26} />
+            <MaterialCommunityIcons name="map-marker" color={color} size={26} />
           ),
         }}
       />
       <Tab.Screen
-        name="Health"
-        component={HealthStack}
+        name="Map"
+        component={MapStack}
         options={{
-          tabBarLabel: 'Health',
+          tabBarLabel: 'Map',
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="human" color={color} size={26} />
+            <MaterialCommunityIcons name="map" color={color} size={26} />
           ),
         }}
       />
