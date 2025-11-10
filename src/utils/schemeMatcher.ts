@@ -16,6 +16,32 @@ export interface MatchedScheme {
   reasons: string[];
 }
 
+export type SchemeCoverage = SubsidyScheme['coverage'];
+
+export interface SchemeFilters {
+  coverage?: SchemeCoverage[];
+  states?: string[];
+  consumerSegments?: ConsumerSegment[];
+  subsidyTypes?: string[];
+  tags?: string[];
+  requiresOwnership?: boolean;
+  gridConnection?: 'grid' | 'off-grid';
+}
+
+export interface MatchOptions {
+  limit?: number;
+  minimumScore?: number;
+  filters?: SchemeFilters;
+}
+
+export interface SchemeFilterOptions {
+  coverage: SchemeCoverage[];
+  states: string[];
+  consumerSegments: ConsumerSegment[];
+  subsidyTypes: string[];
+  tags: string[];
+}
+
 const NORMALIZED_STATE_OVERRIDES: Record<string, string> = {
   'nct of delhi': 'delhi',
   'new delhi': 'delhi',
@@ -57,7 +83,60 @@ function baseScoreForCoverage(scheme: SubsidyScheme, userState: string): { score
   return { score: 0 };
 }
 
-export function matchSubsidySchemes(user: SubsidyUserProfile, limit = 3): MatchedScheme[] {
+function passesFilters(scheme: SubsidyScheme, filters?: SchemeFilters): boolean {
+  if (!filters) return true;
+
+  if (filters.coverage?.length && !filters.coverage.includes(scheme.coverage)) {
+    return false;
+  }
+
+  if (filters.consumerSegments?.length && !scheme.consumerSegments.some(segment => filters.consumerSegments?.includes(segment))) {
+    return false;
+  }
+
+  if (filters.subsidyTypes?.length) {
+    const typeMatches = filters.subsidyTypes.some(type => scheme.subsidyType.toLowerCase().includes(type.toLowerCase()));
+    if (!typeMatches) return false;
+  }
+
+  if (filters.states?.length) {
+    const schemeStates = scheme.states.map(s => s.toLowerCase());
+    const matchesState = filters.states.some(state => {
+      const normalized = normalizeState(state);
+      return schemeStates.includes(normalized) || schemeStates.includes('all');
+    });
+    if (!matchesState) return false;
+  }
+
+  if (filters.tags?.length) {
+    const schemeTags = scheme.tags ?? [];
+    const matchesTag = schemeTags.some(tag => filters.tags?.includes(tag));
+    if (!matchesTag) return false;
+  }
+
+  if (filters.requiresOwnership !== undefined) {
+    if ((scheme.requiresOwnership ?? false) !== filters.requiresOwnership) {
+      return false;
+    }
+  }
+
+  if (filters.gridConnection) {
+    if (filters.gridConnection === 'grid' && scheme.requiresGridConnection === false) {
+      return false;
+    }
+    if (filters.gridConnection === 'off-grid' && scheme.requiresGridConnection !== false) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export function matchSubsidySchemes(user: SubsidyUserProfile, options?: number | MatchOptions): MatchedScheme[] {
+  const limit = typeof options === 'number' ? options : options?.limit ?? 3;
+  const minimumScore = typeof options === 'number' ? 0 : options?.minimumScore ?? 0;
+  const filters = typeof options === 'number' ? undefined : options?.filters;
+
   const normalizedState = normalizeState(user.state);
   const consumerSegment = normalizeConsumerSegment(user.consumerSegment);
   const monthlyUnits =
@@ -70,6 +149,10 @@ export function matchSubsidySchemes(user: SubsidyUserProfile, limit = 3): Matche
   const results: MatchedScheme[] = [];
 
   subsidySchemes.forEach(scheme => {
+    if (!passesFilters(scheme, filters)) {
+      return;
+    }
+
     const reasons: string[] = [];
     let score = 0;
 
@@ -137,7 +220,7 @@ export function matchSubsidySchemes(user: SubsidyUserProfile, limit = 3): Matche
       score += 0.5;
     }
 
-    if (score > 0) {
+    if (score >= minimumScore) {
       results.push({
         scheme,
         matchScore: Number(score.toFixed(2)),
@@ -153,5 +236,37 @@ export function matchSubsidySchemes(user: SubsidyUserProfile, limit = 3): Matche
 
 export function getAllSchemes(): SubsidyScheme[] {
   return subsidySchemes;
+}
+
+export function getSchemeFilterOptions(schemes: SubsidyScheme[] = subsidySchemes): SchemeFilterOptions {
+  const coverage = new Set<SchemeCoverage>();
+  const states = new Set<string>();
+  const consumerSegments = new Set<ConsumerSegment>();
+  const subsidyTypes = new Set<string>();
+  const tags = new Set<string>();
+
+  schemes.forEach(scheme => {
+    coverage.add(scheme.coverage);
+    scheme.states.forEach(state => {
+      if (state !== 'all') {
+        states.add(state);
+      }
+    });
+    scheme.consumerSegments.forEach(segment => consumerSegments.add(segment));
+    subsidyTypes.add(scheme.subsidyType);
+    scheme.tags?.forEach(tag => tags.add(tag));
+  });
+
+  return {
+    coverage: Array.from(coverage),
+    states: Array.from(states),
+    consumerSegments: Array.from(consumerSegments),
+    subsidyTypes: Array.from(subsidyTypes),
+    tags: Array.from(tags),
+  };
+}
+
+export function filterSchemes(filters: SchemeFilters, schemes: SubsidyScheme[] = subsidySchemes): SubsidyScheme[] {
+  return schemes.filter(scheme => passesFilters(scheme, filters));
 }
 

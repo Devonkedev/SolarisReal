@@ -107,14 +107,17 @@ const SubsidyEligibilityScreen = ({ navigation }) => {
     const recommendedKw = estimateSystemSizeKw({ roofArea: areaNum, annualConsumptionKWh: consumptionNum });
 
     const result = estimateSubsidy(recommendedKw);
-    const matches = matchSubsidySchemes({
-      state,
-      consumerSegment,
-      ownsProperty: ownership === 'yes',
-      annualConsumptionKWh: consumptionNum || undefined,
-      roofAreaSqm: areaNum || undefined,
-      isGridConnected: gridConnection === 'grid',
-    });
+    const matches = matchSubsidySchemes(
+      {
+        state,
+        consumerSegment,
+        ownsProperty: ownership === 'yes',
+        annualConsumptionKWh: consumptionNum || undefined,
+        roofAreaSqm: areaNum || undefined,
+        isGridConnected: gridConnection === 'grid',
+      },
+      { limit: 12 }
+    );
 
     navigation.navigate('SubsidyResults', {
       answers: {

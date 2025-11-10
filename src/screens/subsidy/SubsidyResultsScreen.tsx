@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Alert, Image, View, Linking } from 'react-native';
-import { Text, Surface } from 'react-native-paper';
+import { Text, Surface, Chip } from 'react-native-paper';
 import CustomHeader from '../../components/CustomHeader';
 import CustomJuniorHeader from '../../components/CustomJuniorHeader';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import AppButton from '../../components/AppButton';
 import { layout } from '../../styles/layout';
+import { getSchemeFilterOptions, SchemeCoverage } from '../../utils/schemeMatcher';
 
 const SubsidyResultsScreen = ({ route, navigation }) => {
   const { answers, result, matches = [] } = route.params || {};
@@ -14,6 +15,9 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ name?: string; installer?: string; detail?: string; type?: string; image?: string }>({});
+  const [coverageFilter, setCoverageFilter] = useState<'all' | SchemeCoverage>('all');
+  const [ownershipFilter, setOwnershipFilter] = useState<'all' | 'owner' | 'tenant'>('all');
+  const [gridFilter, setGridFilter] = useState<'all' | 'grid' | 'off-grid'>('all');
 
   if (!result) {
     return (
@@ -83,6 +87,32 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
     });
   };
 
+  const filterMeta = useMemo(() => getSchemeFilterOptions(matches.map(m => m.scheme)), [matches]);
+
+  const filteredMatches = useMemo(() => {
+    return matches.filter(({ scheme }) => {
+      if (coverageFilter !== 'all' && scheme.coverage !== coverageFilter) {
+        return false;
+      }
+
+      if (ownershipFilter === 'owner' && !scheme.requiresOwnership) {
+        return false;
+      }
+      if (ownershipFilter === 'tenant' && scheme.requiresOwnership) {
+        return false;
+      }
+
+      if (gridFilter === 'grid' && scheme.requiresGridConnection === false) {
+        return false;
+      }
+      if (gridFilter === 'off-grid' && scheme.requiresGridConnection !== false) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [matches, coverageFilter, ownershipFilter, gridFilter]);
+
   const showImageOptions = () => {
     Alert.alert('Select Image', 'Choose an option', [
       { text: 'Camera', onPress: takePicture },
@@ -127,10 +157,73 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
 
         <Surface style={[styles.surface, styles.matchSurface]} elevation={1}>
           <Text variant="titleMedium">Recommended subsidy programmes</Text>
+          <View style={styles.filterContainer}>
+            <View style={styles.filterGroup}>
+              <Text variant="labelMedium" style={styles.filterLabel}>
+                Coverage
+              </Text>
+              <View style={styles.chipRow}>
+                <Chip
+                  selected={coverageFilter === 'all'}
+                  onPress={() => setCoverageFilter('all')}
+                  style={styles.chip}
+                >
+                  All
+                </Chip>
+                {filterMeta.coverage.map(option => (
+                  <Chip
+                    key={option}
+                    selected={coverageFilter === option}
+                    onPress={() => setCoverageFilter(option)}
+                    style={styles.chip}
+                  >
+                    {option === 'csr' ? 'CSR / NGO' : option.charAt(0).toUpperCase() + option.slice(1)}
+                  </Chip>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.filterGroup}>
+              <Text variant="labelMedium" style={styles.filterLabel}>
+                Ownership
+              </Text>
+              <View style={styles.chipRow}>
+                <Chip selected={ownershipFilter === 'all'} onPress={() => setOwnershipFilter('all')} style={styles.chip}>
+                  All
+                </Chip>
+                <Chip selected={ownershipFilter === 'owner'} onPress={() => setOwnershipFilter('owner')} style={styles.chip}>
+                  Owner required
+                </Chip>
+                <Chip selected={ownershipFilter === 'tenant'} onPress={() => setOwnershipFilter('tenant')} style={styles.chip}>
+                  Tenant-friendly
+                </Chip>
+              </View>
+            </View>
+
+            <View style={styles.filterGroup}>
+              <Text variant="labelMedium" style={styles.filterLabel}>
+                Grid connection
+              </Text>
+              <View style={styles.chipRow}>
+                <Chip selected={gridFilter === 'all'} onPress={() => setGridFilter('all')} style={styles.chip}>
+                  All
+                </Chip>
+                <Chip selected={gridFilter === 'grid'} onPress={() => setGridFilter('grid')} style={styles.chip}>
+                  Grid
+                </Chip>
+                <Chip selected={gridFilter === 'off-grid'} onPress={() => setGridFilter('off-grid')} style={styles.chip}>
+                  Off-grid
+                </Chip>
+              </View>
+            </View>
+          </View>
+
           {matches.length === 0 ? (
             <Text>No direct programme match found. Explore central rooftop schemes via the national portal.</Text>
+          ) : filteredMatches.length === 0 ? (
+            <Text>No programmes match the selected filters. Try loosening them to see more options.</Text>
           ) : (
-            matches.map(({ scheme, matchScore, reasons }) => (
+            filteredMatches.map(({ scheme, matchScore, reasons }) => (
               <View key={scheme.id} style={styles.schemeCard}>
                 <Text style={styles.schemeTitle}>{scheme.name}</Text>
                 <Text style={styles.schemeSubtitle}>{scheme.administrator}</Text>
@@ -233,5 +326,23 @@ const styles = StyleSheet.create({
   schemeMeta: {
     color: '#4B5563',
     fontSize: 13,
+  },
+  filterContainer: {
+    gap: 12,
+    marginBottom: 8,
+  },
+  filterGroup: {
+    gap: 6,
+  },
+  chipRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  chip: {
+    borderRadius: 16,
+  },
+  filterLabel: {
+    color: '#1E293B',
   },
 });
