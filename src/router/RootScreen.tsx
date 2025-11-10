@@ -1,27 +1,41 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
-import { PaperProvider } from 'react-native-paper'
-// import { lightTheme } from '../utils/colors'
-import RootStack from './RootStack'
-import { NavigationContainer } from '@react-navigation/native'
-import { colorPalette } from '../utils/colors'
+import React from 'react';
+import { View } from 'react-native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { PaperProvider } from 'react-native-paper';
+import { LinearGradient } from 'expo-linear-gradient';
+import RootStack from './RootStack';
+import { appLightTheme } from '../theme';
+
+const navigationTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: 'transparent',
+  },
+};
 
 const RootScreen = () => {
-    return (
-        <SafeAreaProvider>
-            <SafeAreaView style={{
-                flex: 1,
-                // backgroundColor: 'black'
-            }}>
-                <PaperProvider theme={colorPalette.light}>
-                    <NavigationContainer>
-                        <RootStack />
-                    </NavigationContainer>
-                </PaperProvider>
-            </SafeAreaView>
-        </SafeAreaProvider>
-    )
-}
+  return (
+    <SafeAreaProvider>
+      <LinearGradient
+        colors={['#0B1120', '#102A43', '#1A365D']}
+        style={{ flex: 1 }}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <SafeAreaView style={{ flex: 1 }}>
+          <PaperProvider theme={appLightTheme}>
+            <View style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.75)' }}>
+              <NavigationContainer theme={navigationTheme}>
+                <RootStack />
+              </NavigationContainer>
+            </View>
+          </PaperProvider>
+        </SafeAreaView>
+      </LinearGradient>
+    </SafeAreaProvider>
+  );
+};
 
-export default RootScreen
+export default RootScreen;

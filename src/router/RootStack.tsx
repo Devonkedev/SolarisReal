@@ -103,10 +103,10 @@ const BottomNavigation = () => {
         }}
       />
       <Tab.Screen
-        name="Trackers"
+        name="Tracker"
         component={TrackerStack}
         options={{
-          tabBarLabel: 'Trackers',
+          tabBarLabel: 'Tracker',
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="map-marker" color={color} size={26} />
           ),

@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Alert, Image, Platform, TouchableOpacity, View } from 'react-native';
-import { Appbar, Button, TextInput, Text, Menu, List } from 'react-native-paper';
+import { Text, Menu, TextInput as PaperTextInput } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import { addPrescription } from '../../config/firebase';
+import CustomHeader from '../../components/CustomHeader';
+import AppTextInput from '../../components/AppTextInput';
+import AppButton from '../../components/AppButton';
+import { layout } from '../../styles/layout';
 
 const OPTIONS = [
   { label: 'On-grid (Net-metering)', value: 'on-grid' },
@@ -124,50 +128,40 @@ const AddPrescriptionScreen: React.FC<Props> = ({ navigation }) => {
   const selectedTypeLabel = OPTIONS.find(o => o.value === type)?.label ?? '';
 
   return (
-    <>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Add Solar Project" />
-      </Appbar.Header>
+    <ScrollView contentContainerStyle={layout.scrollContent} style={layout.screen}>
+      <CustomHeader
+        label="Add solar project"
+        subheading="Keep a living record of installs, vendors and project artefacts."
+      />
 
-      <ScrollView contentContainerStyle={styles.container}>
-        <TextInput
-          label="Project / Site Name"
+      <View style={[layout.formCard, styles.card]}>
+        <AppTextInput
+          label="Project / site name"
           value={name}
           onChangeText={setName}
-          mode="outlined"
-          style={styles.input}
-          error={!!errors.name}
         />
         {errors.name ? <Text style={styles.errorText}>{errors.name}</Text> : null}
 
-        <TextInput
-          label="Installer / Vendor"
+        <AppTextInput
+          label="Installer / vendor"
           value={installer}
           onChangeText={setInstaller}
-          mode="outlined"
-          style={styles.input}
-          error={!!errors.installer}
         />
         {errors.installer ? <Text style={styles.errorText}>{errors.installer}</Text> : null}
 
-        {/* System Type (Dropdown using Menu) */}
-        <View style={{ marginBottom: 16 }}>
+        <View>
+          <Text variant="labelLarge" style={styles.fieldLabel}>
+            System type
+          </Text>
           <Menu
             visible={menuVisible}
             onDismiss={() => setMenuVisible(false)}
             anchor={
-              <TouchableOpacity activeOpacity={0.8} onPress={() => setMenuVisible(true)}>
-                <TextInput
-                  label="System Type"
-                  mode="outlined"
-                  value={selectedTypeLabel}
-                  editable={false}
-                  right={<TextInput.Icon icon="menu-down" />}
-                  error={!!errors.type}
-                />
-              </TouchableOpacity>
+              <AppButton mode="outlined" onPress={() => setMenuVisible(true)} style={styles.selector}>
+                {selectedTypeLabel || 'Select system type'}
+              </AppButton>
             }
+            contentStyle={styles.menuContent}
           >
             {OPTIONS.map(opt => (
               <Menu.Item
@@ -185,13 +179,11 @@ const AddPrescriptionScreen: React.FC<Props> = ({ navigation }) => {
         </View>
 
         <TouchableOpacity onPress={() => setShowDatePicker(true)} activeOpacity={0.7}>
-          <TextInput
-            label="Installation Date"
+          <AppTextInput
+            label="Installation date"
             value={installationDate.toLocaleDateString()}
-            mode="outlined"
-            style={styles.input}
             editable={false}
-            right={<TextInput.Icon icon="calendar" />}
+            right={<PaperTextInput.Icon icon="calendar" />}
           />
         </TouchableOpacity>
         {showDatePicker && (
@@ -202,54 +194,66 @@ const AddPrescriptionScreen: React.FC<Props> = ({ navigation }) => {
             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
             onChange={(_, d) => {
               const sel = d || installationDate;
-              setShowDatePicker(Platform.OS === 'ios'); // keep open on iOS spinner
+              setShowDatePicker(Platform.OS === 'ios');
               setInstallationDate(sel);
             }}
           />
         )}
 
-        <TextInput
-          label="Project Details / Notes"
+        <AppTextInput
+          label="Project details / notes"
           value={detail}
           onChangeText={setDetail}
-          mode="outlined"
           multiline
-          numberOfLines={5}
-          style={[styles.input, styles.detailInput]}
-          error={!!errors.detail}
         />
         {errors.detail ? <Text style={styles.errorText}>{errors.detail}</Text> : null}
 
-        <Button icon="camera" mode="outlined" onPress={showImageOptions} style={styles.imageButton}>
-          {imageUri ? 'Change Image' : 'Add Site Photo'}
-        </Button>
+        <AppButton icon="camera" mode="outlined" onPress={showImageOptions} style={styles.imageButton}>
+          {imageUri ? 'Change image' : 'Add site photo'}
+        </AppButton>
         {errors.image ? <Text style={styles.errorText}>{errors.image}</Text> : null}
 
         {imageUri ? <Image source={{ uri: imageUri }} style={styles.previewImage} resizeMode="cover" /> : null}
 
-        <Button
+        <AppButton
           mode="contained"
           loading={loading}
           onPress={handleSave}
-          style={styles.saveButton}
           disabled={loading}
           icon="content-save"
         >
-          Save Project
-        </Button>
-      </ScrollView>
-    </>
+          Save project
+        </AppButton>
+      </View>
+    </ScrollView>
   );
 };
 
 export default AddPrescriptionScreen;
 
 const styles = StyleSheet.create({
-  container: { padding: 16, paddingBottom: 32 },
-  input: { marginBottom: 16 },
-  detailInput: { height: 120 },
-  imageButton: { marginBottom: 16 },
-  previewImage: { width: '100%', height: 200, marginBottom: 16, borderRadius: 8 },
-  saveButton: { marginTop: 8 },
-  errorText: { color: '#b00020', marginBottom: 8 },
+  card: {
+    gap: 18,
+  },
+  selector: {
+    justifyContent: 'flex-start',
+  },
+  menuContent: {
+    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
+  },
+  imageButton: {
+    marginTop: 8,
+  },
+  previewImage: {
+    width: '100%',
+    height: 220,
+    borderRadius: 20,
+  },
+  errorText: {
+    color: '#b00020',
+  },
+  fieldLabel: {
+    marginBottom: 6,
+  },
 });

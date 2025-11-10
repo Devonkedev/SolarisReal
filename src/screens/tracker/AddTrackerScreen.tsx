@@ -1,11 +1,12 @@
-import { View, Alert, Platform } from 'react-native';
+import { View, Alert, Platform, ScrollView, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
-import { ScrollView } from 'react-native-gesture-handler';
-import { Button, TextInput, Menu } from 'react-native-paper';
+import { Menu, Text } from 'react-native-paper';
 import CustomHeader from '../../components/CustomHeader';
-import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { addTracker } from '../../config/firebase';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import AppTextInput from '../../components/AppTextInput';
+import AppButton from '../../components/AppButton';
+import { layout } from '../../styles/layout';
 
 // Types/categories for energy entries.
 const OPTIONS = [
@@ -89,129 +90,121 @@ const AddTrackerScreen = ({ navigation }) => {
     };
 
     return (
-        <ScrollView contentContainerStyle={{
-            gap: wp(5),
-            paddingHorizontal: wp(5),
-            paddingBottom: wp(10),
-        }}>
+        <ScrollView contentContainerStyle={layout.scrollContent} style={layout.screen}>
             <CustomHeader
-                label="Add Energy Entry"
-                subheading="Record generated/consumed energy and value"
+                label="Add energy entry"
+                subheading="Capture daily generation, consumption or exports in one place."
                 image_url="https://static.vecteezy.com/system/resources/previews/018/231/411/non_2x/solar-panel-energy-icon-vector.jpg"
             />
 
-            <TextInput
-                label="kWh"
-                value={kwh}
-                onChangeText={setKwh}
-                mode="outlined"
-                keyboardType="numeric"
-            />
-
-            <TextInput
-                label="Monetary value (e.g. revenue/savings)"
-                value={revenue}
-                onChangeText={setRevenue}
-                mode="outlined"
-                keyboardType="numeric"
-            />
-
-            <TextInput
-                label="Panel ID (optional)"
-                value={panelId}
-                onChangeText={setPanelId}
-                mode="outlined"
-            />
-
-            <Menu
-                visible={dropdownVisible}
-                onDismiss={() => setDropdownVisible(false)}
-                anchor={
-                    <Button
-                        mode="outlined"
-                        onPress={() => setDropdownVisible(true)}
-                        style={{
-                            justifyContent: 'flex-start',
-                            paddingVertical: 8,
-                        }}
-                        contentStyle={{
-                            justifyContent: 'flex-start',
-                        }}
-                        labelStyle={{
-                            textAlign: 'left',
-                            color: type ? '#000' : '#666',
-                        }}
-                    >
-                        {getSelectedCategoryLabel()}
-                    </Button>
-                }
-                contentStyle={{ marginTop: wp(2) }}
-            >
-                {OPTIONS.map((option) => (
-                    <Menu.Item
-                        key={option.value}
-                        onPress={() => {
-                            setType(option.value);
-                            setDropdownVisible(false);
-                        }}
-                        title={option.label}
-                        titleStyle={{
-                            color: type === option.value ? '#6200ea' : '#000'
-                        }}
-                    />
-                ))}
-            </Menu>
-
-            <Button
-                mode="outlined"
-                onPress={() => setDateVisible(true)}
-                style={{
-                    justifyContent: 'flex-start',
-                    paddingVertical: 8,
-                }}
-                contentStyle={{
-                    justifyContent: 'flex-start',
-                }}
-                icon="calendar"
-            >
-                {formatDate(inputDate)}
-            </Button>
-
-            {dateVisible && (
-                <DateTimePicker
-                    value={inputDate || new Date()}
-                    mode="date"
-                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    onChange={onDateChange}
-                    maximumDate={new Date()}
+            <View style={[layout.formCard, styles.card]}>
+                <AppTextInput
+                    label="kWh"
+                    value={kwh}
+                    onChangeText={setKwh}
+                    keyboardType="numeric"
                 />
-            )}
 
-            <TextInput
-                multiline
-                numberOfLines={4}
-                label="Note (optional)"
-                value={note}
-                onChangeText={setNote}
-                style={{ height: 100 }}
-                mode="outlined"
-            />
+                <AppTextInput
+                    label="Monetary value (₹) — optional"
+                    value={revenue}
+                    onChangeText={setRevenue}
+                    keyboardType="numeric"
+                />
 
-            <Button
-                icon="check"
-                mode="contained"
-                loading={loading}
-                onPress={handleSave}
-                disabled={loading}
-                style={{ marginTop: wp(2) }}
-            >
-                Save Entry
-            </Button>
-            <Button mode="contained" onPress={() => navigation.replace("TrackerScreen") }>
-                Go back
-            </Button>
+                <AppTextInput
+                    label="Panel ID (optional)"
+                    value={panelId}
+                    onChangeText={setPanelId}
+                />
+
+                <Text variant="labelLarge">Entry type</Text>
+                <Menu
+                    visible={dropdownVisible}
+                    onDismiss={() => setDropdownVisible(false)}
+                    anchor={
+                        <AppButton
+                            mode="outlined"
+                            onPress={() => setDropdownVisible(true)}
+                            style={styles.menuAnchor}
+                        >
+                            {getSelectedCategoryLabel()}
+                        </AppButton>
+                    }
+                    contentStyle={styles.menuContent}
+                >
+                    {OPTIONS.map((option) => (
+                        <Menu.Item
+                            key={option.value}
+                            onPress={() => {
+                                setType(option.value);
+                                setDropdownVisible(false);
+                            }}
+                            title={option.label}
+                            titleStyle={{
+                                color: type === option.value ? '#1E3A8A' : '#0F172A',
+                            }}
+                        />
+                    ))}
+                </Menu>
+
+                <AppButton
+                    mode="outlined"
+                    onPress={() => setDateVisible(true)}
+                    icon="calendar"
+                    style={styles.selector}
+                >
+                    {formatDate(inputDate)}
+                </AppButton>
+
+                {dateVisible && (
+                    <DateTimePicker
+                        value={inputDate || new Date()}
+                        mode="date"
+                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                        onChange={onDateChange}
+                        maximumDate={new Date()}
+                    />
+                )}
+
+                <AppTextInput
+                    multiline
+                    label="Note (optional)"
+                    value={note}
+                    onChangeText={setNote}
+                />
+
+                <AppButton
+                    icon="check"
+                    mode="contained"
+                    loading={loading}
+                    onPress={handleSave}
+                    disabled={loading}
+                >
+                    Save entry
+                </AppButton>
+                <AppButton mode="outlined" onPress={() => navigation.replace('TrackerScreen')}>
+                    Go back
+                </AppButton>
+            </View>
         </ScrollView>
     );
 };
 
 export default AddTrackerScreen;
+
+const styles = StyleSheet.create({
+    card: {
+        gap: 18,
+    },
+    menuAnchor: {
+        justifyContent: 'flex-start',
+    },
+    menuContent: {
+        borderRadius: 18,
+        backgroundColor: '#FFFFFF',
+    },
+    selector: {
+        justifyContent: 'flex-start',
+    },
+});

@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { View, ScrollView } from 'react-native';
-import { Button, TextInput, RadioButton, Text } from 'react-native-paper';
+import { View, ScrollView, StyleSheet } from 'react-native';
+import { RadioButton, Text } from 'react-native-paper';
 import CustomHeader from '../../components/CustomHeader';
 import CustomJuniorHeader from '../../components/CustomJuniorHeader';
 import { estimateSubsidy, estimateSystemSizeKw } from '../../utils/subsidyCalculator';
+import { matchSubsidySchemes } from '../../utils/schemeMatcher';
+import AppTextInput from '../../components/AppTextInput';
+import AppButton from '../../components/AppButton';
+import { layout } from '../../styles/layout';
 
 
 const SubsidyEligibilityScreen = ({ navigation }) => {
@@ -89,10 +93,12 @@ const SubsidyEligibilityScreen = ({ navigation }) => {
 // })();
 
   const [state, setState] = useState('');
+  const [consumerSegment, setConsumerSegment] = useState<'residential' | 'agricultural' | 'community'>('residential');
   const [ownership, setOwnership] = useState('yes');
   const [roofType, setRoofType] = useState('concrete');
   const [roofArea, setRoofArea] = useState('');
   const [annualConsumption, setAnnualConsumption] = useState('');
+  const [gridConnection, setGridConnection] = useState<'grid' | 'off-grid'>('grid');
 
   const onSubmit = () => {
     const areaNum = parseFloat(roofArea) || 0;
@@ -101,39 +107,109 @@ const SubsidyEligibilityScreen = ({ navigation }) => {
     const recommendedKw = estimateSystemSizeKw({ roofArea: areaNum, annualConsumptionKWh: consumptionNum });
 
     const result = estimateSubsidy(recommendedKw);
+    const matches = matchSubsidySchemes({
+      state,
+      consumerSegment,
+      ownsProperty: ownership === 'yes',
+      annualConsumptionKWh: consumptionNum || undefined,
+      roofAreaSqm: areaNum || undefined,
+      isGridConnected: gridConnection === 'grid',
+    });
 
-    navigation.navigate('SubsidyResults', { answers: { state, ownership, roofType, roofArea: areaNum, annualConsumption: consumptionNum }, result });
+    navigation.navigate('SubsidyResults', {
+      answers: {
+        state,
+        ownership,
+        consumerSegment,
+        roofType,
+        roofArea: areaNum,
+        annualConsumption: consumptionNum,
+        gridConnection,
+      },
+      result,
+      matches,
+    });
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        <CustomHeader label="Subsidy Eligibility" subheading="Check central and state rooftop subsidies" image_url={"https://i.postimg.cc/CLkyNwZT/Screenshot-2025-11-10-at-5-03-23-PM.png"} />
+    <ScrollView contentContainerStyle={layout.scrollContent} style={layout.screen}>
+      <CustomHeader
+        label="Subsidy eligibility"
+        subheading="Tell us about your site and we’ll surface the best-matched programmes."
+        image_url="https://i.postimg.cc/CLkyNwZT/Screenshot-2025-11-10-at-5-03-23-PM.png"
+      />
 
-        <CustomJuniorHeader label={'Eligibility questionnaire'} action={() => { }} />
+      <View style={[layout.formCard, styles.formCard]}>
+        <CustomJuniorHeader label="Eligibility questionnaire" />
 
-        <View style={{ padding: 16, gap: 12 }}>
-          <TextInput label="State" value={state} onChangeText={setState} mode="outlined" />
+        <AppTextInput label="State" value={state} onChangeText={setState} />
 
-          <View>
-            <Text style={{ marginTop: 8, marginBottom: 4 }}>Do you own the property?</Text>
-            <RadioButton.Group onValueChange={v => setOwnership(v)} value={ownership}>
-              <RadioButton.Item label="Yes" value="yes" />
-              <RadioButton.Item label="No" value="no" />
-            </RadioButton.Group>
-          </View>
-
-          <TextInput label="Roof type (concrete/tin/tiles)" value={roofType} onChangeText={setRoofType} mode="outlined" />
-
-          <TextInput label="Usable rooftop area (sq.m)" value={roofArea} onChangeText={setRoofArea} mode="outlined" keyboardType="numeric" />
-
-          <TextInput label="Annual electricity consumption (kWh) - optional" value={annualConsumption} onChangeText={setAnnualConsumption} mode="outlined" keyboardType="numeric" />
-
-          <Button mode="contained" onPress={onSubmit} style={{ marginTop: 12 }}>Check eligibility & estimate</Button>
+        <View style={styles.group}>
+          <Text variant="labelLarge" style={styles.groupLabel}>
+            Consumer type
+          </Text>
+          <RadioButton.Group onValueChange={v => setConsumerSegment(v as typeof consumerSegment)} value={consumerSegment}>
+            <RadioButton.Item label="Residential" value="residential" />
+            <RadioButton.Item label="Agricultural" value="agricultural" />
+            <RadioButton.Item label="Community / cooperative" value="community" />
+          </RadioButton.Group>
         </View>
-      </ScrollView>
-    </View>
+
+        <View style={styles.group}>
+          <Text variant="labelLarge" style={styles.groupLabel}>
+            Do you own the property?
+          </Text>
+          <RadioButton.Group onValueChange={v => setOwnership(v)} value={ownership}>
+            <RadioButton.Item label="Yes" value="yes" />
+            <RadioButton.Item label="No" value="no" />
+          </RadioButton.Group>
+        </View>
+
+        <View style={styles.group}>
+          <Text variant="labelLarge" style={styles.groupLabel}>
+            Do you have an existing grid connection?
+          </Text>
+          <RadioButton.Group onValueChange={v => setGridConnection(v as typeof gridConnection)} value={gridConnection}>
+            <RadioButton.Item label="Yes, grid-connected" value="grid" />
+            <RadioButton.Item label="No, off-grid / unreliable grid" value="off-grid" />
+          </RadioButton.Group>
+        </View>
+
+        <AppTextInput label="Roof type (concrete / tin / tiles)" value={roofType} onChangeText={setRoofType} />
+        <AppTextInput
+          label="Usable rooftop area (sq.m)"
+          value={roofArea}
+          onChangeText={setRoofArea}
+          keyboardType="numeric"
+        />
+        <AppTextInput
+          label="Annual electricity consumption (kWh) – optional"
+          value={annualConsumption}
+          onChangeText={setAnnualConsumption}
+          keyboardType="numeric"
+        />
+
+        <AppButton onPress={onSubmit}>
+          Check eligibility & estimate
+        </AppButton>
+      </View>
+    </ScrollView>
   );
 };
 
 export default SubsidyEligibilityScreen;
+
+const styles = StyleSheet.create({
+  formCard: {
+    gap: 20,
+  },
+  group: {
+    backgroundColor: 'rgba(226, 232, 240, 0.25)',
+    borderRadius: 18,
+    padding: 16,
+    gap: 8,
+  },
+  groupLabel: {
+    color: '#0F172A',
+  },
+});

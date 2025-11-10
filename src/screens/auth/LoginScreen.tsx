@@ -1,157 +1,67 @@
-import { View, Text, Alert, Image } from "react-native";
-import React, { useState } from "react";
-import { Button, Card, Surface, TextInput, withTheme } from "react-native-paper";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
-// import Background from "../../components/Background";
-import { useTheme } from "react-native-paper";
-import { login } from "../../config/firebase";
-// import { colorPallet } from "../../utils/colorPallet";
-// import { loginUser } from "../../config/firebase";
-// import Logo from "./../../../assets/icon.png"
+import { Alert, ScrollView, View } from 'react-native';
+import React, { useState } from 'react';
+import { Text } from 'react-native-paper';
+import { login } from '../../config/firebase';
+import CustomHeader from '../../components/CustomHeader';
+import AppTextInput from '../../components/AppTextInput';
+import AppButton from '../../components/AppButton';
+import { layout } from '../../styles/layout';
 
 const LoginScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
-  const [text, setText] = useState("");
-  const theme = useTheme();
-
-  // michael@mail.com
-  // bob@mail.com
-
-  // const [email, setEmail] = useState("bob@mail.com");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
     setLoading(true);
     if (!email || !password) {
       setLoading(false);
-      return Alert.alert("Empty fields are not allowed");
+      Alert.alert('Required fields', 'Please enter your email and password to continue.');
+      return;
     }
     try {
       await login(email, password);
-      Alert.alert("User logged successfully!");
+      Alert.alert('Success', 'You are now logged in!');
     } catch (error) {
-      setError(error.message);
+      const message = error?.message || 'Something went wrong';
+      Alert.alert('Unable to login', message);
+    } finally {
       setLoading(false);
-      Alert.alert("Error:", error.message);
     }
-    setLoading(false);
-    return
   };
 
   return (
-    <Surface style={{
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    }}>
-      <Card
-        style={{
-          // backgroundColor: "mediumpurple",
-          width: wp(85),
-          height: hp(90),
-          alignSelf: "center",
-          // marginHorizontal: wp(15),
-          alignItems: "center",
-          justifyContent: "center",
-          // flex: 1,
-        }}
-      >
-        <Image
-          style={{
-            width: wp(25),
-            height: wp(25),
-            marginBottom: wp(7),
-            // borderRadius: wp(20)
-          }}
-          resizeMode="contain"
-        // source={Logo}
-        />
-        <Text
-          style={{
-            fontWeight: "bold",
-            fontSize: wp(7),
-            alignSelf: "center",
-            // color: colorPallet.PRIMARY_COLOR,
-            marginBottom: wp(3),
-          }}
-        >
-          Welcome back
-        </Text>
-        <TextInput
-          label="Email"
-          value={email}
-          mode="outlined"
-          style={{
-            width: wp(70),
-          }}
-          onChangeText={(email) => setEmail(email)}
-        />
-        <TextInput
+    <ScrollView contentContainerStyle={layout.scrollContent} style={layout.screen}>
+      <CustomHeader label="Welcome back" subheading="Sign in to manage your solar journey" />
+      <View style={layout.formCard}>
+        <AppTextInput label="Email" value={email} keyboardType="email-address" autoCapitalize="none" onChangeText={setEmail} />
+        <AppTextInput
           label="Password"
-          mode="outlined"
-          secureTextEntry={true}
+          secureTextEntry
           value={password}
-          style={{
-            width: wp(70),
-            marginTop: wp(5),
-          }}
-          onChangeText={(password) => setPassword(password)}
+          onChangeText={setPassword}
+          textContentType="password"
+          autoCapitalize="none"
         />
 
-        <Text
-          onPress={() => navigation.navigate("ForgotPassword", {})}
-          style={{
-            fontSize: wp(3.2),
-            alignSelf: "flex-end",
-            marginRight: wp(7),
-            marginTop: wp(2),
-            // color: theme.colors.gray,
-          }}
-        >
-          Forgot password
-        </Text>
+        <View style={{ alignItems: 'flex-end' }}>
+          <Text variant="labelMedium" onPress={() => navigation.navigate('ForgotPassword', {})}>
+            Forgot password?
+          </Text>
+        </View>
 
-        <Button
-          loading={loading}
-          mode="contained"
-          style={{
-            width: wp(70),
-            borderRadius: wp(2),
-            marginTop: wp(6),
-            paddingVertical: wp(1),
-            // backgroundColor: colorPallet.PRIMARY_COLOR,
-          }}
-        onPress={handleLogin}
-        >
+        <AppButton onPress={handleLogin} loading={loading}>
           Login
-        </Button>
+        </AppButton>
 
-        <Text
-          onPress={() => navigation.navigate("RegisterScreen", {})}
-          style={{
-            fontSize: wp(3.2),
-            marginRight: wp(7),
-            marginTop: wp(3),
-            // color: theme.colors.gray,
-          }}
-        >
-          Don't have an account?{" "}
-          <Text
-            style={{
-              fontWeight: "bold",
-              // color: colorPallet.PRIMARY_COLOR,
-            }}
-          >
+        <Text style={{ textAlign: 'center' }} onPress={() => navigation.navigate('RegisterScreen', {})}>
+          Don’t have an account?{' '}
+          <Text style={{ fontFamily: 'OpenSauce-Bold' }}>
             Sign up
           </Text>
         </Text>
-      </Card>
-    </Surface>
+      </View>
+    </ScrollView>
   );
 };
 

@@ -3528,6 +3528,11 @@ expo-keep-awake@~15.0.7:
   resolved "https://registry.npmjs.org/expo-keep-awake/-/expo-keep-awake-15.0.7.tgz"
   integrity sha512-CgBNcWVPnrIVII5G54QDqoE125l+zmqR4HR8q+MQaCfHet+dYpS5vX5zii/RMayzGN4jPgA4XYIQ28ePKFjHoA==
 
+expo-linear-gradient@~13.0.3:
+  version "13.0.3-canary-20240719-83ee47b"
+  resolved "https://registry.yarnpkg.com/expo-linear-gradient/-/expo-linear-gradient-13.0.3-canary-20240719-83ee47b.tgz#6cf6d9c5626b68028659fc6c0ef120093913136d"
+  integrity sha512-HKz5qbNnp4huZlcI5cS6EYWSoVKoB1gnLzY4IshamRv+9pql2FpHkohZrRMTxIniE9xFh66yl1EK004sP1gCrw==
+
 expo-modules-autolinking@3.0.21:
   version "3.0.21"
   resolved "https://registry.npmjs.org/expo-modules-autolinking/-/expo-modules-autolinking-3.0.21.tgz"

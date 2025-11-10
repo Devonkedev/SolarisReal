@@ -1,15 +1,15 @@
 import { StatusBar } from 'expo-status-bar';
-import { Platform, StyleSheet, Text, View } from 'react-native';
-import { PaperProvider } from 'react-native-paper';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, View } from 'react-native';
 import RootScreen from './src/router/RootScreen';
 import { useEffect, useRef, useState } from 'react';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { initializeNotifications } from './src/utils/notification';
+import { useAppFonts } from './src/theme/fonts';
 
 
 export default function App() {
+  const fontsLoaded = useAppFonts();
   const [expoPushToken, setExpoPushToken] = useState('');
   const [notification, setNotification] = useState(undefined);
   const notificationListener = useRef(null);
@@ -73,11 +73,15 @@ export default function App() {
   //     responseListener.current && Notifications.removeNotificationSubscription(responseListener.current);
   //   };
   // }, []);
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0B1120' }}>
+        <ActivityIndicator size="large" color="#6EA8FF" />
+      </View>
+    );
+  }
 
-
-  return (
-    <RootScreen />
-  );
+  return <RootScreen />;
 }
 
 
@@ -95,11 +99,4 @@ async function schedulePushNotification() {
   });
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const styles = {};
