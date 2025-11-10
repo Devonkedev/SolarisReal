@@ -31,7 +31,7 @@ const CustomHeader = () => {
           justifyContent: 'center',
           alignItems: 'center',
         }}>
-          <Avatar.Image size={wp(18)} source={{ uri: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/47/6f/b1/476fb1a8-653c-58d2-5a6b-93c1a66d0335/AppIcon-0-0-1x_U007emarketing-0-5-0-85-220.png/512x512bb.jpg' }} />
+          <Avatar.Image size={wp(18)} source={{ uri: 'https://i.postimg.cc/CLkyNwZT/Screenshot-2025-11-10-at-5-03-23-PM.png' }} />
         </View>
       </Surface>
       <View>

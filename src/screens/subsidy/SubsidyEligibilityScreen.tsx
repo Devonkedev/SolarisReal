@@ -108,7 +108,7 @@ const SubsidyEligibilityScreen = ({ navigation }) => {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        <CustomHeader label="Subsidy Eligibility" subheading="Check central and state rooftop subsidies" image_url={null} />
+        <CustomHeader label="Subsidy Eligibility" subheading="Check central and state rooftop subsidies" image_url={"https://i.postimg.cc/CLkyNwZT/Screenshot-2025-11-10-at-5-03-23-PM.png"} />
 
         <CustomJuniorHeader label={'Eligibility questionnaire'} action={() => { }} />
 

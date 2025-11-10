@@ -83,7 +83,7 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView>
-        <CustomHeader label="Estimate" subheading="Indicative subsidy & net cost" image_url={null} />
+        <CustomHeader label="Estimate" subheading="Indicative subsidy & net cost" image_url={"https://i.postimg.cc/CLkyNwZT/Screenshot-2025-11-10-at-5-03-23-PM.png"} />
 
         <CustomJuniorHeader label={'Summary'} action={() => { }} />
 
