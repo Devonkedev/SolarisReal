@@ -13,7 +13,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 type Props = { navigation: any };
 
 const AddProjectScreen: React.FC<Props> = ({ navigation }) => {
-  const { t } = useTranslation();
+  const { t, translate } = useTranslation();
   const [name, setName] = useState('');
   const [installer, setInstaller] = useState('');
   const [detail, setDetail] = useState('');
@@ -43,7 +43,7 @@ const AddProjectScreen: React.FC<Props> = ({ navigation }) => {
     try {
       const permission = await ImagePicker.requestCameraPermissionsAsync();
       if (!permission.granted) {
-        Alert.alert('Permission denied', 'Camera access is required.');
+        Alert.alert(translate('Permission denied'), translate('Camera access is required.'));
         return;
       }
       const result = await ImagePicker.launchCameraAsync({ allowsEditing: true, quality: 0.5, base64: true });
@@ -55,7 +55,7 @@ const AddProjectScreen: React.FC<Props> = ({ navigation }) => {
       }
     } catch (err) {
       console.error('Error taking picture:', err);
-      Alert.alert('Error', 'Failed to take picture');
+      Alert.alert(translate('Error'), translate('Failed to take picture'));
     }
   };
 
@@ -63,7 +63,7 @@ const AddProjectScreen: React.FC<Props> = ({ navigation }) => {
     try {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permission.granted) {
-        Alert.alert('Permission denied', 'Gallery access is required.');
+        Alert.alert(translate('Permission denied'), translate('Gallery access is required.'));
         return;
       }
       const result = await ImagePicker.launchImageLibraryAsync({ allowsEditing: true, quality: 0.5, base64: true });
@@ -75,15 +75,15 @@ const AddProjectScreen: React.FC<Props> = ({ navigation }) => {
       }
     } catch (err) {
       console.error('Error selecting image:', err);
-      Alert.alert('Error', 'Failed to select image');
+      Alert.alert(translate('Error'), translate('Failed to select image'));
     }
   };
 
   const showImageOptions = () => {
-    Alert.alert('Select Image', 'Choose an option', [
-      { text: 'Camera', onPress: takePicture },
-      { text: 'Gallery', onPress: selectFromGallery },
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(translate('Select image'), translate('Choose an option'), [
+      { text: translate('Camera'), onPress: takePicture },
+      { text: translate('Gallery'), onPress: selectFromGallery },
+      { text: translate('Cancel'), style: 'cancel' },
     ]);
   };
 

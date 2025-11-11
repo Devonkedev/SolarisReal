@@ -8,6 +8,7 @@ import { matchSubsidySchemes } from '../../utils/schemeMatcher';
 import AppTextInput from '../../components/AppTextInput';
 import AppButton from '../../components/AppButton';
 import { layout } from '../../styles/layout';
+import { useTranslation } from '../../hooks/useTranslation';
 
 
 const SubsidyEligibilityScreen = ({ navigation }) => {
@@ -164,8 +165,8 @@ const SubsidyEligibilityScreen = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={layout.scrollContent} style={layout.screen}>
       <CustomHeader
-        label="Subsidy eligibility"
-        subheading="Tell us about your site and we’ll surface the best-matched programmes."
+        label={translate('Subsidy eligibility')}
+        subheading={translate('Tell us about your site and we’ll surface the best-matched programmes.')}
         image_url="https://i.postimg.cc/CLkyNwZT/Screenshot-2025-11-10-at-5-03-23-PM.png"
       />
 

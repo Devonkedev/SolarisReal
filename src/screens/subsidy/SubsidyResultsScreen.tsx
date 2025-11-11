@@ -3,14 +3,15 @@ import { ScrollView, StyleSheet, Alert, Image, View, Linking } from 'react-nativ
 import { Text, Surface, Chip } from 'react-native-paper';
 import CustomHeader from '../../components/CustomHeader';
 import CustomJuniorHeader from '../../components/CustomJuniorHeader';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import AppButton from '../../components/AppButton';
 import { layout } from '../../styles/layout';
 import { getSchemeFilterOptions, SchemeCoverage } from '../../utils/schemeMatcher';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const SubsidyResultsScreen = ({ route, navigation }) => {
   const { answers, result, matches = [] } = route.params || {};
+  const { translate } = useTranslation();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -22,26 +23,29 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
   if (!result) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>No results to show</Text>
+        <Text>{translate('No results to show')}</Text>
       </View>
     );
   }
 
   const { grossCost, central, stateSubsidy, netCost, systemKw } = result;
 
-  const docs = [
-    'Identity proof (Aadhaar)',
-    'Address proof',
-    'Property proof / Sale deed',
-    'Latest electricity bill (last 3 months)',
-    'Bank details for subsidy transfer',
-  ];
+  const docs = useMemo(
+    () => [
+      translate('Identity proof (Aadhaar)'),
+      translate('Address proof'),
+      translate('Property proof / Sale deed'),
+      translate('Latest electricity bill (last 3 months)'),
+      translate('Bank details for subsidy transfer'),
+    ],
+    [translate]
+  );
 
   const takePicture = async () => {
     try {
       const permission = await ImagePicker.requestCameraPermissionsAsync();
       if (!permission.granted) {
-        Alert.alert('Permission denied', 'Camera access is required.');
+        Alert.alert(translate('Permission denied'), translate('Camera access is required.'));
         return;
       }
       const result = await ImagePicker.launchCameraAsync({ allowsEditing: true, quality: 0.5, base64: true });
@@ -53,7 +57,7 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
       }
     } catch (err) {
       console.error('Error taking picture:', err);
-      Alert.alert('Error', 'Failed to take picture');
+      Alert.alert(translate('Error'), translate('Failed to take picture'));
     }
   };
 
@@ -61,7 +65,7 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
     try {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permission.granted) {
-        Alert.alert('Permission denied', 'Gallery access is required.');
+        Alert.alert(translate('Permission denied'), translate('Gallery access is required.'));
         return;
       }
       const result = await ImagePicker.launchImageLibraryAsync({ allowsEditing: true, quality: 0.5, base64: true });
@@ -73,17 +77,23 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
       }
     } catch (err) {
       console.error('Error selecting image:', err);
-      Alert.alert('Error', 'Failed to select image');
+      Alert.alert(translate('Error'), translate('Failed to select image'));
     }
   };
 
   const handleOpenUrl = (url?: string) => {
     if (!url) {
-      Alert.alert('No application link', 'Application details are available through your DISCOM/official portal.');
+      Alert.alert(
+        translate('No application link'),
+        translate('Application details are available through your DISCOM/official portal.')
+      );
       return;
     }
     Linking.openURL(url).catch(() => {
-      Alert.alert('Unable to open link', 'Please copy the URL and open it in your browser.');
+      Alert.alert(
+        translate('Unable to open link'),
+        translate('Please copy the URL and open it in your browser.')
+      );
     });
   };
 
@@ -114,10 +124,10 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
   }, [matches, coverageFilter, ownershipFilter, gridFilter]);
 
   const showImageOptions = () => {
-    Alert.alert('Select Image', 'Choose an option', [
-      { text: 'Camera', onPress: takePicture },
-      { text: 'Gallery', onPress: selectFromGallery },
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(translate('Select image'), translate('Choose an option'), [
+      { text: translate('Camera'), onPress: takePicture },
+      { text: translate('Gallery'), onPress: selectFromGallery },
+      { text: translate('Cancel'), style: 'cancel' },
     ]);
   };
 
@@ -125,42 +135,50 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
   return (
     <ScrollView contentContainerStyle={layout.scrollContent} style={layout.screen}>
       <CustomHeader
-        label="Estimate & recommendations"
-        subheading="Here’s a snapshot of your system sizing, subsidies and next steps."
+        label={translate('Estimate & recommendations')}
+        subheading={translate('Here’s a snapshot of your system sizing, subsidies and next steps.')}
         image_url="https://i.postimg.cc/CLkyNwZT/Screenshot-2025-11-10-at-5-03-23-PM.png"
       />
 
       <View style={[layout.formCard, styles.cardStack]}>
-        <CustomJuniorHeader label="Summary" />
+        <CustomJuniorHeader label={translate('Summary')} />
 
         <Surface style={styles.surface} elevation={1}>
-          <Text variant="titleMedium">Recommended system size</Text>
+          <Text variant="titleMedium">{translate('Recommended system size')}</Text>
           <Text variant="headlineMedium" style={styles.highlight}>
             {systemKw.toFixed(2)} kW
           </Text>
         </Surface>
 
         <Surface style={styles.surface} elevation={1}>
-          <Text variant="titleMedium">Cost breakdown</Text>
-          <Text>Gross system cost: ₹{Math.round(grossCost).toLocaleString()}</Text>
-          <Text>Central subsidy: ₹{Math.round(central).toLocaleString()}</Text>
-          <Text>State/DISCOM subsidy: ₹{Math.round(stateSubsidy).toLocaleString()}</Text>
-          <Text style={styles.total}>Estimated net cost: ₹{Math.round(netCost).toLocaleString()}</Text>
+          <Text variant="titleMedium">{translate('Cost breakdown')}</Text>
+          <Text>
+            {translate('Gross system cost')}: ₹{Math.round(grossCost).toLocaleString()}
+          </Text>
+          <Text>
+            {translate('Central subsidy')}: ₹{Math.round(central).toLocaleString()}
+          </Text>
+          <Text>
+            {translate('State/DISCOM subsidy')}: ₹{Math.round(stateSubsidy).toLocaleString()}
+          </Text>
+          <Text style={styles.total}>
+            {translate('Estimated net cost')}: ₹{Math.round(netCost).toLocaleString()}
+          </Text>
         </Surface>
 
         <Surface style={styles.surface} elevation={1}>
-          <Text variant="titleMedium">Documents typically required</Text>
+          <Text variant="titleMedium">{translate('Documents typically required')}</Text>
           {docs.map((d, i) => (
             <Text key={i}>• {d}</Text>
           ))}
         </Surface>
 
         <Surface style={[styles.surface, styles.matchSurface]} elevation={1}>
-          <Text variant="titleMedium">Recommended subsidy programmes</Text>
+          <Text variant="titleMedium">{translate('Recommended subsidy programmes')}</Text>
           <View style={styles.filterContainer}>
             <View style={styles.filterGroup}>
               <Text variant="labelMedium" style={styles.filterLabel}>
-                Coverage
+                {translate('Coverage')}
               </Text>
               <View style={styles.chipRow}>
                 <Chip
@@ -168,7 +186,7 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
                   onPress={() => setCoverageFilter('all')}
                   style={styles.chip}
                 >
-                  All
+                  {translate('All')}
                 </Chip>
                 {filterMeta.coverage.map(option => (
                   <Chip
@@ -177,7 +195,9 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
                     onPress={() => setCoverageFilter(option)}
                     style={styles.chip}
                   >
-                    {option === 'csr' ? 'CSR / NGO' : option.charAt(0).toUpperCase() + option.slice(1)}
+                    {option === 'csr'
+                      ? translate('CSR / NGO')
+                      : translate(option.charAt(0).toUpperCase() + option.slice(1))}
                   </Chip>
                 ))}
               </View>
@@ -185,84 +205,90 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
 
             <View style={styles.filterGroup}>
               <Text variant="labelMedium" style={styles.filterLabel}>
-                Ownership
+                {translate('Ownership')}
               </Text>
               <View style={styles.chipRow}>
                 <Chip selected={ownershipFilter === 'all'} onPress={() => setOwnershipFilter('all')} style={styles.chip}>
-                  All
+                  {translate('All')}
                 </Chip>
                 <Chip selected={ownershipFilter === 'owner'} onPress={() => setOwnershipFilter('owner')} style={styles.chip}>
-                  Owner required
+                  {translate('Owner required')}
                 </Chip>
                 <Chip selected={ownershipFilter === 'tenant'} onPress={() => setOwnershipFilter('tenant')} style={styles.chip}>
-                  Tenant-friendly
+                  {translate('Tenant-friendly')}
                 </Chip>
               </View>
             </View>
 
             <View style={styles.filterGroup}>
               <Text variant="labelMedium" style={styles.filterLabel}>
-                Grid connection
+                {translate('Grid connection')}
               </Text>
               <View style={styles.chipRow}>
                 <Chip selected={gridFilter === 'all'} onPress={() => setGridFilter('all')} style={styles.chip}>
-                  All
+                  {translate('All')}
                 </Chip>
                 <Chip selected={gridFilter === 'grid'} onPress={() => setGridFilter('grid')} style={styles.chip}>
-                  Grid
+                  {translate('Grid')}
                 </Chip>
                 <Chip selected={gridFilter === 'off-grid'} onPress={() => setGridFilter('off-grid')} style={styles.chip}>
-                  Off-grid
+                  {translate('Off-grid')}
                 </Chip>
               </View>
             </View>
           </View>
 
           {matches.length === 0 ? (
-            <Text>No direct programme match found. Explore central rooftop schemes via the national portal.</Text>
+            <Text>
+              {translate(
+                'No direct programme match found. Explore central rooftop schemes via the national portal.'
+              )}
+            </Text>
           ) : filteredMatches.length === 0 ? (
-            <Text>No programmes match the selected filters. Try loosening them to see more options.</Text>
+            <Text>
+              {translate('No programmes match the selected filters. Try loosening them to see more options.')}
+            </Text>
           ) : (
             filteredMatches.map(({ scheme, matchScore, reasons }) => (
               <View key={scheme.id} style={styles.schemeCard}>
                 <Text style={styles.schemeTitle}>{scheme.name}</Text>
                 <Text style={styles.schemeSubtitle}>{scheme.administrator}</Text>
-                <Text>Match score: {matchScore.toFixed(1)}</Text>
-                <Text>Subsidy type: {scheme.subsidyType}</Text>
-                <Text>Benefit: {scheme.benefit}</Text>
-                <Text style={styles.schemeReasonsLabel}>Why it fits:</Text>
+                <Text>{translate('Match score')}: {matchScore.toFixed(1)}</Text>
+                <Text>{translate('Subsidy type')}: {scheme.subsidyType}</Text>
+                <Text>{translate('Benefit')}: {scheme.benefit}</Text>
+                <Text style={styles.schemeReasonsLabel}>{translate('Why it fits')}:</Text>
                 {reasons.map((reason, idx) => (
                   <Text key={idx} style={styles.schemeReason}>
                     • {reason}
                   </Text>
                 ))}
-                <Text>Application: {scheme.applicationProcess}</Text>
+                <Text>{translate('Application')}: {scheme.applicationProcess}</Text>
                 {scheme.applicationUrl ? (
                   <AppButton mode="outlined" onPress={() => handleOpenUrl(scheme.applicationUrl)} compact>
-                    Open portal
+                    {translate('Open portal')}
                   </AppButton>
                 ) : (
                   <AppButton mode="outlined" onPress={() => handleOpenUrl()} compact>
-                    See details
+                    {translate('See details')}
                   </AppButton>
                 )}
-                <Text style={styles.schemeMeta}>Timeline: {scheme.timeline}</Text>
-                <Text style={styles.schemeMeta}>Vendors: {scheme.vendorInfo}</Text>
-                <Text style={styles.schemeMeta}>Notes: {scheme.notes}</Text>
+                <Text style={styles.schemeMeta}>{translate('Timeline')}: {scheme.timeline}</Text>
+                <Text style={styles.schemeMeta}>{translate('Vendors')}: {scheme.vendorInfo}</Text>
+                <Text style={styles.schemeMeta}>{translate('Notes')}: {scheme.notes}</Text>
               </View>
             ))
           )}
         </Surface>
 
         <AppButton mode="outlined" onPress={showImageOptions} style={styles.imageButton}>
-          {imageUri ? 'Change image' : 'Add documents'}
+          {imageUri ? translate('Change image') : translate('Add documents')}
         </AppButton>
         {errors.image ? <Text style={styles.errorText}>{errors.image}</Text> : null}
 
         {imageUri ? <Image source={{ uri: imageUri }} style={styles.previewImage} resizeMode="cover" /> : null}
 
         <AppButton mode="contained" onPress={() => navigation.goBack()}>
-          Back
+          {translate('Back')}
         </AppButton>
       </View>
     </ScrollView>

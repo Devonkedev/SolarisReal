@@ -53,7 +53,7 @@ const CustomListCard = ({
 
 
 const ProjectsScreen = ({ navigation }) => {
-  const { t } = useTranslation()
+  const { t, translate } = useTranslation()
   const [projects, setProjects] = useState([])
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -63,7 +63,7 @@ const ProjectsScreen = ({ navigation }) => {
       const data = await getProjects();
       setProjects(data); // your state
     } catch (err) {
-      Alert.alert('Error', err.message);
+      Alert.alert(translate('Error'), err.message);
     }
   };
 

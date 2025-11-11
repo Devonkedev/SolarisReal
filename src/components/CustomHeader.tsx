@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import { Text, Surface } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from '../hooks/useTranslation';
 
 type Props = {
   label?: string;
@@ -13,6 +14,7 @@ const fallbackImage =
   'https://images.unsplash.com/photo-1509395176047-4a66953fd231?auto=format&fit=crop&w=320&q=80';
 
 const CustomHeader: React.FC<Props> = ({ label, subheading, image_url }) => {
+  const { translate } = useTranslation();
   return (
     <Surface style={styles.container} elevation={3}>
       <LinearGradient
@@ -23,10 +25,10 @@ const CustomHeader: React.FC<Props> = ({ label, subheading, image_url }) => {
       >
         <View style={styles.textContainer}>
           <Text variant="titleLarge" style={styles.title}>
-            {label || 'Solaris'}
+            {label || translate('Solaris')}
           </Text>
           <Text variant="bodyMedium" style={styles.subtitle}>
-            {subheading || 'Smarter solar journeys start here'}
+            {subheading || translate('Smarter solar journeys start here')}
           </Text>
         </View>
         <View style={styles.imageWrapper}>

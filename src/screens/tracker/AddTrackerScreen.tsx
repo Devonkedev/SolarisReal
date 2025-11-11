@@ -1,5 +1,5 @@
 import { View, Alert, Platform, ScrollView, StyleSheet } from 'react-native';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Menu, Text } from 'react-native-paper';
 import CustomHeader from '../../components/CustomHeader';
 import { addTracker } from '../../config/firebase';
@@ -7,16 +7,10 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import AppTextInput from '../../components/AppTextInput';
 import AppButton from '../../components/AppButton';
 import { layout } from '../../styles/layout';
-
-// Types/categories for energy entries.
-const OPTIONS = [
-    { label: 'Generation', value: 'generation' },
-    { label: 'Consumption', value: 'consumption' },
-    { label: 'Export', value: 'export' },
-    { label: 'Other', value: 'other' },
-];
+import { useTranslation } from '../../hooks/useTranslation';
 
 const AddTrackerScreen = ({ navigation }) => {
+    const { translate } = useTranslation();
     const [kwh, setKwh] = useState('');
     const [revenue, setRevenue] = useState('');
     const [panelId, setPanelId] = useState('');
@@ -27,18 +21,28 @@ const AddTrackerScreen = ({ navigation }) => {
     const [dropdownVisible, setDropdownVisible] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    const options = useMemo(
+        () => [
+            { label: translate('Generation'), value: 'generation' },
+            { label: translate('Consumption'), value: 'consumption' },
+            { label: translate('Export'), value: 'export' },
+            { label: translate('Other'), value: 'other' },
+        ],
+        [translate]
+    );
+
     const handleSave = async () => {
         setLoading(true);
 
         const parsedKwh = parseFloat(kwh);
         const parsedRevenue = parseFloat(revenue || '0');
         if (isNaN(parsedKwh) || parsedKwh <= 0) {
-            Alert.alert("Error", "Please enter a valid kWh value greater than 0");
+            Alert.alert(translate('Error'), translate('Please enter a valid kWh value greater than 0'));
             setLoading(false);
             return;
         }
         if (!type) {
-            Alert.alert("Error", "Please select a type (Generation/Consumption)");
+            Alert.alert(translate('Error'), translate('Please select a type (Generation/Consumption)'));
             setLoading(false);
             return;
         }
@@ -55,12 +59,12 @@ const AddTrackerScreen = ({ navigation }) => {
 
         try {
             await addTracker(trackerData);
-            Alert.alert("Success", "Entry saved!", [
-                { text: "OK", onPress: () => navigation.navigate("TrackerScreen") }
+            Alert.alert(translate('Success'), translate('Entry saved!'), [
+                { text: translate('OK'), onPress: () => navigation.navigate("TrackerScreen") }
             ]);
         } catch (error) {
             console.error("Error saving tracker:", error);
-            Alert.alert("Error", "Failed to save entry");
+            Alert.alert(translate('Error'), translate('Failed to save entry'));
         }
         setLoading(false);
     };
@@ -76,8 +80,8 @@ const AddTrackerScreen = ({ navigation }) => {
     };
 
     const formatDate = (date) => {
-        if (!date) return 'Select Date';
-        return date.toLocaleDateString('en-US', {
+        if (!date) return translate('Select date');
+        return date.toLocaleDateString(undefined, {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
@@ -85,40 +89,40 @@ const AddTrackerScreen = ({ navigation }) => {
     };
 
     const getSelectedCategoryLabel = () => {
-        const selected = OPTIONS.find(opt => opt.value === type);
-        return selected ? selected.label : 'Select type';
+        const selected = options.find(opt => opt.value === type);
+        return selected ? selected.label : translate('Select type');
     };
 
     return (
         <ScrollView contentContainerStyle={layout.scrollContent} style={layout.screen}>
             <CustomHeader
-                label="Add energy entry"
-                subheading="Capture daily generation, consumption or exports in one place."
+                label={translate('Add energy entry')}
+                subheading={translate('Capture daily generation, consumption or exports in one place.')}
                 image_url="https://static.vecteezy.com/system/resources/previews/018/231/411/non_2x/solar-panel-energy-icon-vector.jpg"
             />
 
             <View style={[layout.formCard, styles.card]}>
                 <AppTextInput
-                    label="kWh"
+                    label={translate('kWh')}
                     value={kwh}
                     onChangeText={setKwh}
                     keyboardType="numeric"
                 />
 
                 <AppTextInput
-                    label="Monetary value (₹) — optional"
+                    label={translate('Monetary value (₹) — optional')}
                     value={revenue}
                     onChangeText={setRevenue}
                     keyboardType="numeric"
                 />
 
                 <AppTextInput
-                    label="Panel ID (optional)"
+                    label={translate('Panel ID (optional)')}
                     value={panelId}
                     onChangeText={setPanelId}
                 />
 
-                <Text variant="labelLarge">Entry type</Text>
+                <Text variant="labelLarge">{translate('Entry type')}</Text>
                 <Menu
                     visible={dropdownVisible}
                     onDismiss={() => setDropdownVisible(false)}
@@ -133,7 +137,7 @@ const AddTrackerScreen = ({ navigation }) => {
                     }
                     contentStyle={styles.menuContent}
                 >
-                    {OPTIONS.map((option) => (
+                    {options.map((option) => (
                         <Menu.Item
                             key={option.value}
                             onPress={() => {
@@ -169,7 +173,7 @@ const AddTrackerScreen = ({ navigation }) => {
 
                 <AppTextInput
                     multiline
-                    label="Note (optional)"
+                    label={translate('Note (optional)')}
                     value={note}
                     onChangeText={setNote}
                 />
@@ -181,10 +185,10 @@ const AddTrackerScreen = ({ navigation }) => {
                     onPress={handleSave}
                     disabled={loading}
                 >
-                    Save entry
+                    {translate('Save entry')}
                 </AppButton>
                 <AppButton mode="outlined" onPress={() => navigation.replace('TrackerScreen')}>
-                    Go back
+                    {translate('Go back')}
                 </AppButton>
             </View>
         </ScrollView>

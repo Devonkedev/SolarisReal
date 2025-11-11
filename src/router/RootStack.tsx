@@ -17,6 +17,7 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import EditProfile from '../screens/profile/EditProfileScreen';
 import AddHealthDataScreen from '../screens/map/AddHealthDataScreen';
+import { useTranslation } from '../hooks/useTranslation';
 
 const Tab = createMaterialBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -82,6 +83,7 @@ const ProfileStack = () => {
 }
 
 const BottomNavigation = () => {
+  const { translate } = useTranslation();
   return (
     <Tab.Navigator
     initialRouteName="Solar"
@@ -95,7 +97,7 @@ const BottomNavigation = () => {
         name="Solar"
         component={SubsidyStack}
         options={{
-          tabBarLabel: 'Solar Subsidy',
+          tabBarLabel: translate('Solar subsidy'),
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="solar-power" color={color} size={26} />
           ),
@@ -106,7 +108,7 @@ const BottomNavigation = () => {
         name="Projects"
         component={ProjectsStack}
         options={{
-          tabBarLabel: 'Projects',
+          tabBarLabel: translate('Projects'),
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="clipboard-text" color={color} size={26} />
           ),
@@ -117,7 +119,7 @@ const BottomNavigation = () => {
         name="Tracker"
         component={TrackerStack}
         options={{
-          tabBarLabel: 'Tracker',
+          tabBarLabel: translate('Tracker'),
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="map-marker" color={color} size={26} />
           ),
@@ -127,7 +129,7 @@ const BottomNavigation = () => {
         name="Map"
         component={MapStack}
         options={{
-          tabBarLabel: 'Map',
+          tabBarLabel: translate('Map'),
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="map" color={color} size={26} />
           ),
@@ -138,7 +140,7 @@ const BottomNavigation = () => {
         name="Profile"
         component={ProfileStack}
         options={{
-          tabBarLabel: 'Profile',
+          tabBarLabel: translate('Profile'),
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="account" color={color} size={26} />
           ),

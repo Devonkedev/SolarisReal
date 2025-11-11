@@ -5,6 +5,7 @@ import { Button, FAB, Surface, Text } from 'react-native-paper';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { auth, getUserProfile } from '../../config/firebase';
 import CustomJuniorHeader from '../../components/CustomJuniorHeader';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const ProfileHealthSection = ({ item }) => (
   <Surface style={{
@@ -20,6 +21,7 @@ const ProfileHealthSection = ({ item }) => (
 );
 
 const ProfileScreen = ({ navigation }) => {
+  const { translate } = useTranslation();
   const [profileData, setProfileData] = useState({
     name: '',
     email: '', 
@@ -87,21 +89,21 @@ const ProfileScreen = ({ navigation }) => {
     }}>
       <ScrollView contentContainerStyle={{ paddingBottom: wp(20) }}>
         <CustomHeader
-          label="Profile"
-          subheading="Here you can edit your profile."
+          label={translate('Profile')}
+          subheading={translate('Here you can edit your profile.')}
           image_url="https://i.postimg.cc/850GGdyL/Screenshot-2025-09-27-at-1-13-48-PM.png"
         />
 
-        <CustomJuniorHeader label={'Profile'} action={() => { }} />
+        <CustomJuniorHeader label={translate('Profile')} action={() => { }} />
 
         <View style={{ gap: wp(0), marginBottom: wp(6) }}>
           {profileSettings.map((item, index) => (
-            <ProfileHealthSection key={index} item={item} />
+            <ProfileHealthSection key={index} item={{ ...item, label: translate(item.label) }} />
           ))}
         </View>
 
   {/* <Button onPress={() => navigation.navigate('SubsidyEligibility')}> Check Solar Subsidy </Button> */}
-  <Button onPress={() => auth.signOut()}> Logout </Button>
+  <Button onPress={() => auth.signOut()}>{translate('Logout')}</Button>
       </ScrollView>
       <FAB
         icon="pen"
@@ -112,6 +114,7 @@ const ProfileScreen = ({ navigation }) => {
           bottom: 0,
         }}
         onPress={handlePress}
+        accessibilityLabel={translate('Edit profile')}
       />
     </View>
   );

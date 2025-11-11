@@ -1,4 +1,4 @@
-import { ScrollView, View } from 'react-native'
+import { Alert, ScrollView, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Badge, FAB, Text, Surface } from 'react-native-paper'
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
@@ -8,8 +8,10 @@ import LogoutButton from '../../components/LogoutButton'
 import { fetchTrackers, getTrackerSummary } from '../../config/firebase'
 import { format } from 'date-fns'
 import CustomJuniorHeader from '../../components/CustomJuniorHeader'
+import { useTranslation } from '../../hooks/useTranslation'
 
 const CustomCardSection = ({ kwh, revenue, panelId, type, note }) => {
+  const { translate } = useTranslation()
   return (
     <View style={{
       flexDirection: 'row',
@@ -18,17 +20,17 @@ const CustomCardSection = ({ kwh, revenue, panelId, type, note }) => {
     }}>
       {/* LEFT */}
       <View>
-        <Text variant="titleMedium">{panelId ? `${panelId} • ${type}` : type || 'NA'}</Text>
+        <Text variant="titleMedium">{panelId ? `${panelId} • ${translate(type || '')}` : translate(type || '') || translate('Not available')}</Text>
         <Text variant="bodySmall">{note || ''}</Text>
       </View>
       {/* RIGHT: kWh and revenue */}
       <View style={{ alignItems: 'flex-end' }}>
-        <Text variant="titleMedium">{typeof kwh === 'number' ? `${kwh.toFixed(2)} kWh` : (kwh || 'NA')}</Text>
+        <Text variant="titleMedium">{typeof kwh === 'number' ? `${kwh.toFixed(2)} kWh` : (kwh || translate('Not available'))}</Text>
         <Badge style={{
           alignSelf: 'flex-start',
           paddingHorizontal: wp(2),
           marginTop: wp(1),
-        }}>{typeof revenue === 'number' ? `$${revenue.toFixed(2)}` : (revenue || 'NA')}</Badge>
+        }}>{typeof revenue === 'number' ? `₹${revenue.toFixed(2)}` : (revenue || translate('Not available'))}</Badge>
       </View>
     </View>
   )
@@ -36,9 +38,10 @@ const CustomCardSection = ({ kwh, revenue, panelId, type, note }) => {
 
 
 const CustomListCard = ({ data }) => {
+  const { translate } = useTranslation()
 
   const formatTrackerDate = (dateString: string) => {
-    if (!dateString) return 'No date';
+    if (!dateString) return translate('No date');
     const dateObj = new Date(dateString);
     return format(dateObj, 'EEEE, MMMM dd, yyyy');
   };
@@ -60,7 +63,7 @@ const CustomListCard = ({ data }) => {
             marginBottom: wp(1),
           }}
         >
-          {data.date ? formatTrackerDate(data.date) : 'No date set'}
+          {data.date ? formatTrackerDate(data.date) : translate('No date set')}
         </Badge>
 
         <View style={{
@@ -81,6 +84,7 @@ const CustomListCard = ({ data }) => {
 
 
 const TrackerScreen = ({ navigation }) => {
+  const { translate } = useTranslation()
   const [trackers, setTrackers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState({ totalKwh: 0, totalRevenue: 0, count: 0 });
@@ -101,7 +105,7 @@ const TrackerScreen = ({ navigation }) => {
         // ignore
       }
     } catch (error) {
-      alert('Failed to load trackers');
+          Alert.alert(translate('Error'), translate('Failed to load trackers'));
     } finally {
       setLoading(false);
     }
@@ -117,14 +121,14 @@ const TrackerScreen = ({ navigation }) => {
       flex: 1,
     }}>
       <ScrollView contentContainerStyle={{}}>
-        <CustomHeader label={'Trackers'} subheading={'Here you can add your trackers'} image_url={'https://static.vecteezy.com/system/resources/previews/033/870/873/non_2x/location-pin-target-icon-on-white-background-tracking-location-navigation-gps-symbol-vector.jpg'} />
+        <CustomHeader label={translate('Trackers')} subheading={translate('Here you can add your trackers')} image_url={'https://static.vecteezy.com/system/resources/previews/033/870/873/non_2x/location-pin-target-icon-on-white-background-tracking-location-navigation-gps-symbol-vector.jpg'} />
         
-        <CustomJuniorHeader label={'Trackers'} action={() => {}} />
+        <CustomJuniorHeader label={translate('Trackers')} action={() => {}} />
 
         <Surface style={{ padding: wp(4), margin: wp(3), borderRadius: wp(2) }}>
-          <Text variant="titleMedium">Total: {summary.count} entries</Text>
-          <Text variant="bodyLarge">Total energy: {summary.totalKwh?.toFixed?.(2) || 0} kWh</Text>
-          <Text variant="bodyLarge">Estimated value: ${summary.totalRevenue?.toFixed?.(2) || 0}</Text>
+          <Text variant="titleMedium">{translate('Total entries')}: {summary.count}</Text>
+          <Text variant="bodyLarge">{translate('Total energy')}: {summary.totalKwh?.toFixed?.(2) || 0} kWh</Text>
+          <Text variant="bodyLarge">{translate('Estimated value')}: ₹{summary.totalRevenue?.toFixed?.(2) || 0}</Text>
         </Surface>
 
         <View style={{
@@ -136,7 +140,10 @@ const TrackerScreen = ({ navigation }) => {
                 <CustomListCard key={item.id} data={item} />
               ))
             ) : (
-              <ActivityIndicator />
+              <View style={{ alignItems: 'center', paddingVertical: wp(5), gap: wp(2) }}>
+                <ActivityIndicator />
+                <Text>{translate('Loading trackers…')}</Text>
+              </View>
             )
           }
         </View>
@@ -145,6 +152,7 @@ const TrackerScreen = ({ navigation }) => {
 
       <FAB
         icon="plus"
+        accessibilityLabel={translate('Add tracker entry')}
         style={{
           position: 'absolute',
           margin: 16,

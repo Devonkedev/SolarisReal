@@ -6,8 +6,10 @@ import CustomHeader from '../../components/CustomHeader';
 import AppTextInput from '../../components/AppTextInput';
 import AppButton from '../../components/AppButton';
 import { layout } from '../../styles/layout';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const RegisterScreen = ({ navigation }) => {
+  const { translate } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,7 +17,7 @@ const RegisterScreen = ({ navigation }) => {
 
   const handleSignup = async () => {
     if (!email || !password || !name) {
-      Alert.alert('Missing information', 'Please complete your name, email and password.');
+      Alert.alert(translate('Missing information'), translate('Please complete your name, email and password.'));
       return;
     }
 
@@ -23,11 +25,11 @@ const RegisterScreen = ({ navigation }) => {
 
     try {
       await register(email, password);
-      Alert.alert('Welcome aboard!', 'Your account is ready. You can sign in now.');
+      Alert.alert(translate('Welcome aboard!'), translate('Your account is ready. You can sign in now.'));
       navigation.navigate('LoginScreen');
     } catch (error) {
       const message = error?.message || 'Unable to create your account. Please try again.';
-      Alert.alert('Something went wrong', message);
+      Alert.alert(translate('Something went wrong'), translate(message));
     } finally {
       setLoading(false);
     }
@@ -35,20 +37,20 @@ const RegisterScreen = ({ navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={layout.scrollContent} style={layout.screen}>
-      <CustomHeader label="Create your account" subheading="A few quick details to unlock your solar toolkit" />
+      <CustomHeader label={translate('Create your account')} subheading={translate('A few quick details to unlock your solar toolkit')} />
       <View style={layout.formCard}>
-        <AppTextInput label="Full name" value={name} onChangeText={setName} />
-        <AppTextInput label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
-        <AppTextInput label="Password" value={password} onChangeText={setPassword} secureTextEntry autoCapitalize="none" />
+        <AppTextInput label={translate('Full name')} value={name} onChangeText={setName} />
+        <AppTextInput label={translate('Email')} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+        <AppTextInput label={translate('Password')} value={password} onChangeText={setPassword} secureTextEntry autoCapitalize="none" />
 
         <AppButton onPress={handleSignup} loading={loading}>
-          Register
+          {translate('Register')}
         </AppButton>
 
         <Text style={{ textAlign: 'center' }} onPress={() => navigation.navigate('LoginScreen')}>
-          Already have an account?{' '}
+          {translate('Already have an account?')}{' '}
           <Text style={{ fontFamily: 'OpenSauce-Bold' }}>
-            Sign in
+            {translate('Sign in')}
           </Text>
         </Text>
       </View>

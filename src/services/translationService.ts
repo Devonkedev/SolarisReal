@@ -3,7 +3,7 @@ const GOOGLE_TRANSLATE_ENDPOINT =
 
 const cache = new Map<string, string>();
 
-async function translateText(
+export async function translateText(
   text: string,
   targetLanguage: string,
   sourceLanguage = 'en'
