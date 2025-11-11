@@ -41,7 +41,7 @@ const CustomListCard = ({ data }) => {
   const { translate } = useTranslation()
 
   const formatTrackerDate = (dateString: string) => {
-    if (!dateString) return translate('No date');
+    if (!dateString) return translate('No date set');
     const dateObj = new Date(dateString);
     return format(dateObj, 'EEEE, MMMM dd, yyyy');
   };
@@ -97,10 +97,18 @@ const TrackerScreen = ({ navigation }) => {
   const loadTrackers = async () => {
     try {
       const data = await fetchTrackers();
-      setTrackers(data);
+      setTrackers(Array.isArray(data) ? data : []);
       try {
         const s = await getTrackerSummary();
-        setSummary(s as any);
+        if (s && typeof s === 'object') {
+          setSummary({
+            totalKwh: Number(s.totalKwh) || 0,
+            totalRevenue: Number(s.totalRevenue) || 0,
+            count: Number(s.count) || 0,
+          });
+        } else {
+          setSummary({ totalKwh: 0, totalRevenue: 0, count: 0 });
+        }
       } catch (e) {
         // ignore
       }
@@ -127,8 +135,12 @@ const TrackerScreen = ({ navigation }) => {
 
         <Surface style={{ padding: wp(4), margin: wp(3), borderRadius: wp(2) }}>
           <Text variant="titleMedium">{translate('Total entries')}: {summary.count}</Text>
-          <Text variant="bodyLarge">{translate('Total energy')}: {summary.totalKwh?.toFixed?.(2) || 0} kWh</Text>
-          <Text variant="bodyLarge">{translate('Estimated value')}: ₹{summary.totalRevenue?.toFixed?.(2) || 0}</Text>
+          <Text variant="bodyLarge">
+            {translate('Total energy')}: {(typeof summary.totalKwh === 'number' ? summary.totalKwh : 0).toFixed(2)} kWh
+          </Text>
+          <Text variant="bodyLarge">
+            {translate('Estimated value')}: ₹{(typeof summary.totalRevenue === 'number' ? summary.totalRevenue : 0).toFixed(2)}
+          </Text>
         </Surface>
 
         <View style={{
