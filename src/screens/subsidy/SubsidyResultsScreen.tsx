@@ -30,6 +30,14 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
 
   const { grossCost, central, stateSubsidy, netCost, systemKw } = result;
 
+  const estimatedAnnualSavings = useMemo(() => {
+    const monthlyBill = Number(answers?.monthlyBill ?? 0);
+    if (monthlyBill > 0) {
+      return monthlyBill * 12 * 0.6;
+    }
+    return systemKw * 1100 * 6;
+  }, [answers, systemKw]);
+
   const docs = useMemo(
     () => [
       translate('Identity proof (Aadhaar)'),
@@ -164,6 +172,24 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
           <Text style={styles.total}>
             {translate('Estimated net cost')}: ₹{Math.round(netCost).toLocaleString()}
           </Text>
+        </Surface>
+
+        <Surface style={[styles.surface, styles.vendorCta]} elevation={1}>
+          <Text variant="titleMedium">{translate('Ready to talk to installers?')}</Text>
+          <Text style={styles.vendorCopy}>
+            {translate('Based on your profile you could save around')} ₹{Math.round(estimatedAnnualSavings).toLocaleString()}{' '}
+            {translate('each year.')}
+          </Text>
+          <AppButton
+            onPress={() =>
+              navigation.navigate('SubsidyVendors', {
+                recommendedKw: systemKw,
+                estimatedAnnualSavings,
+              })
+            }
+          >
+            {translate('Browse installers & quotes')}
+          </AppButton>
         </Surface>
 
         <Surface style={styles.surface} elevation={1}>
@@ -370,5 +396,11 @@ const styles = StyleSheet.create({
   },
   filterLabel: {
     color: '#1E293B',
+  },
+  vendorCta: {
+    gap: 16,
+  },
+  vendorCopy: {
+    color: '#0F172A',
   },
 });

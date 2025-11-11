@@ -7,6 +7,7 @@ import LoginScreen from '../screens/auth/LoginScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import SubsidyEligibilityScreen from '../screens/subsidy/SubsidyEligibilityScreen';
 import SubsidyResultsScreen from '../screens/subsidy/SubsidyResultsScreen';
+import SubsidyVendorsScreen from '../screens/subsidy/SubsidyVendorsScreen';
 import TrackerScreen from '../screens/tracker/TrackerScreen';
 import ProjectsScreen from '../screens/projects/ProjectsScreen';
 import AddProjectScreen from '../screens/projects/AddProjectScreen';
@@ -57,6 +58,7 @@ const SubsidyStack = () => {
   <Stack.Navigator id={undefined} screenOptions={{ headerShown: false }}>
       <Stack.Screen name="SubsidyEligibility" component={SubsidyEligibilityScreen} />
       <Stack.Screen name="SubsidyResults" component={SubsidyResultsScreen} />
+      <Stack.Screen name="SubsidyVendors" component={SubsidyVendorsScreen} />
     </Stack.Navigator>
   );
 };
@@ -76,6 +78,7 @@ const ProfileStack = () => {
       <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
       <Stack.Screen name="SubsidyEligibility" component={SubsidyEligibilityScreen} />
       <Stack.Screen name="SubsidyResults" component={SubsidyResultsScreen} />
+      <Stack.Screen name="SubsidyVendors" component={SubsidyVendorsScreen} />
       <Stack.Screen name="EditProfile" component={EditProfile} />
       {/* Add otherauth screens here if needed */}
     </Stack.Navigator >
