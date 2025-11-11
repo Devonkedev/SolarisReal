@@ -93,6 +93,8 @@ const SubsidyEligibilityScreen = ({ navigation }) => {
 //   }
 // })();
 
+  const { translate } = useTranslation();
+
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [state, setState] = useState('');
   const [consumerSegment, setConsumerSegment] = useState<'residential' | 'agricultural' | 'community'>('residential');
@@ -171,70 +173,73 @@ const SubsidyEligibilityScreen = ({ navigation }) => {
       />
 
       <View style={[layout.formCard, styles.formCard]}>
-        <CustomJuniorHeader label="Eligibility journey" />
+        <CustomJuniorHeader label={translate('Eligibility journey')} />
         <Text variant="labelLarge" style={styles.stepIndicator}>
-          Step {currentStep} of 3
+          {`${translate('Step')} ${currentStep} ${translate('of')} 3`}
         </Text>
 
         {currentStep === 1 && (
           <>
             <Text variant="bodyMedium" style={styles.introText}>
-              Let’s start with the hard numbers so we can size your solar dream accurately.
+              {translate('Let’s start with the hard numbers so we can size your solar dream accurately.')}
             </Text>
 
             <AppTextInput
-              label="Usable rooftop area (sq.m)"
+              label={translate('Usable rooftop area (sq.m)')}
               value={roofArea}
               onChangeText={setRoofArea}
               keyboardType="numeric"
             />
             <AppTextInput
-              label="Annual electricity consumption (kWh)"
+              label={translate('Annual electricity consumption (kWh)')}
               value={annualConsumption}
               onChangeText={setAnnualConsumption}
               keyboardType="numeric"
             />
             <AppTextInput
-              label="Average monthly electricity bill (₹)"
+              label={translate('Average monthly electricity bill (₹)')}
               value={monthlyBill}
               onChangeText={setMonthlyBill}
               keyboardType="numeric"
             />
 
-            <AppButton onPress={handleNumbersNext}>Next: Preview your savings</AppButton>
+            <AppButton onPress={handleNumbersNext}>{translate('Next: Preview your savings')}</AppButton>
           </>
         )}
 
         {currentStep === 2 && (
           <View style={styles.congratsCard}>
             <Text variant="headlineSmall" style={styles.congratsTitle}>
-              Congratulations!
+              {translate('Congratulations!')}
             </Text>
             <Text variant="bodyLarge" style={styles.congratsBody}>
-              With a {recommendedKw.toFixed(1)} kW rooftop solar system you can start banking sunshine.
+              {translate('With a {size} kW rooftop solar system you can start banking sunshine.').replace(
+                '{size}',
+                recommendedKw.toFixed(1)
+              )}
             </Text>
             <View style={styles.highlightBox}>
               <Text variant="labelLarge" style={styles.highlightLabel}>
-                Your solar impact
+                {translate('Your solar impact')}
               </Text>
               <Text style={styles.highlightValue}>{estimatedAnnualOutput.toLocaleString(undefined, { maximumFractionDigits: 0 })} kWh</Text>
-              <Text style={styles.highlightHint}>Annual clean energy generation</Text>
+              <Text style={styles.highlightHint}>{translate('Annual clean energy generation')}</Text>
               <Text style={[styles.highlightValue, styles.highlightSavings]}>
                 ₹{Math.round(estimatedAnnualSavings).toLocaleString()}
               </Text>
               <Text style={styles.highlightHint}>
-                Estimated savings once your panels are up
+                {translate('Estimated savings once your panels are up')}
               </Text>
             </View>
             <Text variant="bodyMedium" style={styles.congratsBody}>
-              Keep going to see the subsidies you unlock and the programmes tailored for you.
+              {translate('Keep going to see the subsidies you unlock and the programmes tailored for you.')}
             </Text>
             <Text style={styles.highlightHint}>
-              Estimated post-subsidy investment: ₹{Math.round(preview.netCost).toLocaleString()}
+              {translate('Estimated post-subsidy investment')}: ₹{Math.round(preview.netCost).toLocaleString()}
             </Text>
-            <AppButton onPress={handleCelebrateContinue}>Continue to programme match</AppButton>
+            <AppButton onPress={handleCelebrateContinue}>{translate('Continue to programme match')}</AppButton>
             <AppButton onPress={() => showStep(1)} mode="outlined">
-              Adjust my numbers
+              {translate('Adjust my numbers')}
             </AppButton>
           </View>
         )}
@@ -242,47 +247,47 @@ const SubsidyEligibilityScreen = ({ navigation }) => {
         {currentStep === 3 && (
           <>
             <Text variant="bodyMedium" style={styles.introText}>
-              Great! Now tell us a bit about your site so we can match regional incentives.
+              {translate('Great! Now tell us a bit about your site so we can match regional incentives.')}
             </Text>
 
-            <AppTextInput label="State" value={state} onChangeText={setState} />
+            <AppTextInput label={translate('State')} value={state} onChangeText={setState} />
 
             <View style={styles.group}>
               <Text variant="labelLarge" style={styles.groupLabel}>
-                Consumer type
+                {translate('Consumer type')}
               </Text>
               <RadioButton.Group onValueChange={v => setConsumerSegment(v as typeof consumerSegment)} value={consumerSegment}>
-                <RadioButton.Item label="Residential" value="residential" />
-                <RadioButton.Item label="Agricultural" value="agricultural" />
-                <RadioButton.Item label="Community / cooperative" value="community" />
+                <RadioButton.Item label={translate('Residential')} value="residential" />
+                <RadioButton.Item label={translate('Agricultural')} value="agricultural" />
+                <RadioButton.Item label={translate('Community / cooperative')} value="community" />
               </RadioButton.Group>
             </View>
 
             <View style={styles.group}>
               <Text variant="labelLarge" style={styles.groupLabel}>
-                Do you own the property?
+                {translate('Do you own the property?')}
               </Text>
               <RadioButton.Group onValueChange={v => setOwnership(v)} value={ownership}>
-                <RadioButton.Item label="Yes" value="yes" />
-                <RadioButton.Item label="No" value="no" />
+                <RadioButton.Item label={translate('Yes')} value="yes" />
+                <RadioButton.Item label={translate('No')} value="no" />
               </RadioButton.Group>
             </View>
 
             <View style={styles.group}>
               <Text variant="labelLarge" style={styles.groupLabel}>
-                Do you have an existing grid connection?
+                {translate('Do you have an existing grid connection?')}
               </Text>
               <RadioButton.Group onValueChange={v => setGridConnection(v as typeof gridConnection)} value={gridConnection}>
-                <RadioButton.Item label="Yes, grid-connected" value="grid" />
-                <RadioButton.Item label="No, off-grid / unreliable grid" value="off-grid" />
+                <RadioButton.Item label={translate('Yes, grid-connected')} value="grid" />
+                <RadioButton.Item label={translate('No, off-grid / unreliable grid')} value="off-grid" />
               </RadioButton.Group>
             </View>
 
-            <AppTextInput label="Roof type (concrete / tin / tiles)" value={roofType} onChangeText={setRoofType} />
+            <AppTextInput label={translate('Roof type (concrete / tin / tiles)')} value={roofType} onChangeText={setRoofType} />
 
-            <AppButton onPress={onSubmit}>Check eligibility & estimate</AppButton>
+            <AppButton onPress={onSubmit}>{translate('Check eligibility & estimate')}</AppButton>
             <AppButton onPress={() => showStep(2)} mode="outlined">
-              Back to savings
+              {translate('Back to savings')}
             </AppButton>
           </>
         )}
