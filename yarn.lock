@@ -3529,9 +3529,9 @@ expo-keep-awake@~15.0.7:
   integrity sha512-CgBNcWVPnrIVII5G54QDqoE125l+zmqR4HR8q+MQaCfHet+dYpS5vX5zii/RMayzGN4jPgA4XYIQ28ePKFjHoA==
 
 expo-linear-gradient@~13.0.3:
-  version "15.0.8-canary-20251031-b135dff"
-  resolved "https://registry.yarnpkg.com/expo-linear-gradient/-/expo-linear-gradient-15.0.8-canary-20251031-b135dff.tgz#5d1262febf878b633a9b4dc42af3f644b7ae900c"
-  integrity sha512-o/hY8/wUeHJRMRoV34xLUp4pvIBg42+0PY6pxr63B6uVqHm4EGTN1tCLoQfIaR5Tm3O6WWRlfetdh95HO/JcMw==
+  version "15.0.8-canary-20251023-4c86f95"
+  resolved "https://registry.yarnpkg.com/expo-linear-gradient/-/expo-linear-gradient-15.0.8-canary-20251023-4c86f95.tgz#c4b59866b8a0ad3b673aa4e718807cd32e537a32"
+  integrity sha512-DgKM2aP9LoleXi3GFzz8CmDuHVldIYItc0dmLHD5hnNZ17uaFDSOg3NcDL/MQF+1T/Z+/n38VuyY+ZbbgLy9HQ==
 
 expo-localization@~17.0.7:
   version "17.0.7"

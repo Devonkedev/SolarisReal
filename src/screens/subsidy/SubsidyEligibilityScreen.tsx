@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { RadioButton, Text } from 'react-native-paper';
 import CustomHeader from '../../components/CustomHeader';
@@ -92,20 +92,46 @@ const SubsidyEligibilityScreen = ({ navigation }) => {
 //   }
 // })();
 
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [state, setState] = useState('');
   const [consumerSegment, setConsumerSegment] = useState<'residential' | 'agricultural' | 'community'>('residential');
   const [ownership, setOwnership] = useState('yes');
   const [roofType, setRoofType] = useState('concrete');
   const [roofArea, setRoofArea] = useState('');
   const [annualConsumption, setAnnualConsumption] = useState('');
+  const [monthlyBill, setMonthlyBill] = useState('');
   const [gridConnection, setGridConnection] = useState<'grid' | 'off-grid'>('grid');
 
+  const areaNum = useMemo(() => parseFloat(roofArea) || 0, [roofArea]);
+  const consumptionNum = useMemo(() => parseFloat(annualConsumption) || 0, [annualConsumption]);
+  const monthlyBillNum = useMemo(() => parseFloat(monthlyBill) || 0, [monthlyBill]);
+
+  const recommendedKw = useMemo(() => estimateSystemSizeKw({ roofArea: areaNum, annualConsumptionKWh: consumptionNum }), [
+    areaNum,
+    consumptionNum,
+  ]);
+
+  const preview = useMemo(() => estimateSubsidy(recommendedKw), [recommendedKw]);
+
+  const estimatedAnnualOutput = useMemo(() => recommendedKw * 1100, [recommendedKw]);
+  const estimatedAnnualSavings = useMemo(() => {
+    if (monthlyBillNum > 0) {
+      return monthlyBillNum * 12 * 0.6;
+    }
+    return estimatedAnnualOutput * 6;
+  }, [estimatedAnnualOutput, monthlyBillNum]);
+
+  const showStep = (step: 1 | 2 | 3) => setCurrentStep(step);
+
+  const handleNumbersNext = () => {
+    showStep(2);
+  };
+
+  const handleCelebrateContinue = () => {
+    showStep(3);
+  };
+
   const onSubmit = () => {
-    const areaNum = parseFloat(roofArea) || 0;
-    const consumptionNum = parseFloat(annualConsumption) || 0;
-
-    const recommendedKw = estimateSystemSizeKw({ roofArea: areaNum, annualConsumptionKWh: consumptionNum });
-
     const result = estimateSubsidy(recommendedKw);
     const matches = matchSubsidySchemes(
       {
@@ -128,6 +154,7 @@ const SubsidyEligibilityScreen = ({ navigation }) => {
         roofArea: areaNum,
         annualConsumption: consumptionNum,
         gridConnection,
+        monthlyBill: monthlyBillNum || undefined,
       },
       result,
       matches,
@@ -143,58 +170,121 @@ const SubsidyEligibilityScreen = ({ navigation }) => {
       />
 
       <View style={[layout.formCard, styles.formCard]}>
-        <CustomJuniorHeader label="Eligibility questionnaire" />
+        <CustomJuniorHeader label="Eligibility journey" />
+        <Text variant="labelLarge" style={styles.stepIndicator}>
+          Step {currentStep} of 3
+        </Text>
 
-        <AppTextInput label="State" value={state} onChangeText={setState} />
+        {currentStep === 1 && (
+          <>
+            <Text variant="bodyMedium" style={styles.introText}>
+              Let’s start with the hard numbers so we can size your solar dream accurately.
+            </Text>
 
-        <View style={styles.group}>
-          <Text variant="labelLarge" style={styles.groupLabel}>
-            Consumer type
-          </Text>
-          <RadioButton.Group onValueChange={v => setConsumerSegment(v as typeof consumerSegment)} value={consumerSegment}>
-            <RadioButton.Item label="Residential" value="residential" />
-            <RadioButton.Item label="Agricultural" value="agricultural" />
-            <RadioButton.Item label="Community / cooperative" value="community" />
-          </RadioButton.Group>
-        </View>
+            <AppTextInput
+              label="Usable rooftop area (sq.m)"
+              value={roofArea}
+              onChangeText={setRoofArea}
+              keyboardType="numeric"
+            />
+            <AppTextInput
+              label="Annual electricity consumption (kWh)"
+              value={annualConsumption}
+              onChangeText={setAnnualConsumption}
+              keyboardType="numeric"
+            />
+            <AppTextInput
+              label="Average monthly electricity bill (₹)"
+              value={monthlyBill}
+              onChangeText={setMonthlyBill}
+              keyboardType="numeric"
+            />
 
-        <View style={styles.group}>
-          <Text variant="labelLarge" style={styles.groupLabel}>
-            Do you own the property?
-          </Text>
-          <RadioButton.Group onValueChange={v => setOwnership(v)} value={ownership}>
-            <RadioButton.Item label="Yes" value="yes" />
-            <RadioButton.Item label="No" value="no" />
-          </RadioButton.Group>
-        </View>
+            <AppButton onPress={handleNumbersNext}>Next: Preview your savings</AppButton>
+          </>
+        )}
 
-        <View style={styles.group}>
-          <Text variant="labelLarge" style={styles.groupLabel}>
-            Do you have an existing grid connection?
-          </Text>
-          <RadioButton.Group onValueChange={v => setGridConnection(v as typeof gridConnection)} value={gridConnection}>
-            <RadioButton.Item label="Yes, grid-connected" value="grid" />
-            <RadioButton.Item label="No, off-grid / unreliable grid" value="off-grid" />
-          </RadioButton.Group>
-        </View>
+        {currentStep === 2 && (
+          <View style={styles.congratsCard}>
+            <Text variant="headlineSmall" style={styles.congratsTitle}>
+              Congratulations!
+            </Text>
+            <Text variant="bodyLarge" style={styles.congratsBody}>
+              With a {recommendedKw.toFixed(1)} kW rooftop solar system you can start banking sunshine.
+            </Text>
+            <View style={styles.highlightBox}>
+              <Text variant="labelLarge" style={styles.highlightLabel}>
+                Your solar impact
+              </Text>
+              <Text style={styles.highlightValue}>{estimatedAnnualOutput.toLocaleString(undefined, { maximumFractionDigits: 0 })} kWh</Text>
+              <Text style={styles.highlightHint}>Annual clean energy generation</Text>
+              <Text style={[styles.highlightValue, styles.highlightSavings]}>
+                ₹{Math.round(estimatedAnnualSavings).toLocaleString()}
+              </Text>
+              <Text style={styles.highlightHint}>
+                Estimated savings once your panels are up
+              </Text>
+            </View>
+            <Text variant="bodyMedium" style={styles.congratsBody}>
+              Keep going to see the subsidies you unlock and the programmes tailored for you.
+            </Text>
+            <Text style={styles.highlightHint}>
+              Estimated post-subsidy investment: ₹{Math.round(preview.netCost).toLocaleString()}
+            </Text>
+            <AppButton onPress={handleCelebrateContinue}>Continue to programme match</AppButton>
+            <AppButton onPress={() => showStep(1)} mode="outlined">
+              Adjust my numbers
+            </AppButton>
+          </View>
+        )}
 
-        <AppTextInput label="Roof type (concrete / tin / tiles)" value={roofType} onChangeText={setRoofType} />
-        <AppTextInput
-          label="Usable rooftop area (sq.m)"
-          value={roofArea}
-          onChangeText={setRoofArea}
-          keyboardType="numeric"
-        />
-        <AppTextInput
-          label="Annual electricity consumption (kWh) – optional"
-          value={annualConsumption}
-          onChangeText={setAnnualConsumption}
-          keyboardType="numeric"
-        />
+        {currentStep === 3 && (
+          <>
+            <Text variant="bodyMedium" style={styles.introText}>
+              Great! Now tell us a bit about your site so we can match regional incentives.
+            </Text>
 
-        <AppButton onPress={onSubmit}>
-          Check eligibility & estimate
-        </AppButton>
+            <AppTextInput label="State" value={state} onChangeText={setState} />
+
+            <View style={styles.group}>
+              <Text variant="labelLarge" style={styles.groupLabel}>
+                Consumer type
+              </Text>
+              <RadioButton.Group onValueChange={v => setConsumerSegment(v as typeof consumerSegment)} value={consumerSegment}>
+                <RadioButton.Item label="Residential" value="residential" />
+                <RadioButton.Item label="Agricultural" value="agricultural" />
+                <RadioButton.Item label="Community / cooperative" value="community" />
+              </RadioButton.Group>
+            </View>
+
+            <View style={styles.group}>
+              <Text variant="labelLarge" style={styles.groupLabel}>
+                Do you own the property?
+              </Text>
+              <RadioButton.Group onValueChange={v => setOwnership(v)} value={ownership}>
+                <RadioButton.Item label="Yes" value="yes" />
+                <RadioButton.Item label="No" value="no" />
+              </RadioButton.Group>
+            </View>
+
+            <View style={styles.group}>
+              <Text variant="labelLarge" style={styles.groupLabel}>
+                Do you have an existing grid connection?
+              </Text>
+              <RadioButton.Group onValueChange={v => setGridConnection(v as typeof gridConnection)} value={gridConnection}>
+                <RadioButton.Item label="Yes, grid-connected" value="grid" />
+                <RadioButton.Item label="No, off-grid / unreliable grid" value="off-grid" />
+              </RadioButton.Group>
+            </View>
+
+            <AppTextInput label="Roof type (concrete / tin / tiles)" value={roofType} onChangeText={setRoofType} />
+
+            <AppButton onPress={onSubmit}>Check eligibility & estimate</AppButton>
+            <AppButton onPress={() => showStep(2)} mode="outlined">
+              Back to savings
+            </AppButton>
+          </>
+        )}
       </View>
     </ScrollView>
   );
@@ -206,6 +296,23 @@ const styles = StyleSheet.create({
   formCard: {
     gap: 20,
   },
+  stepIndicator: {
+    color: '#475569',
+  },
+  introText: {
+    color: '#0F172A',
+  },
+  congratsCard: {
+    gap: 16,
+    alignItems: 'flex-start',
+  },
+  congratsTitle: {
+    color: '#047857',
+    fontWeight: '700',
+  },
+  congratsBody: {
+    color: '#0F172A',
+  },
   group: {
     backgroundColor: 'rgba(226, 232, 240, 0.25)',
     borderRadius: 18,
@@ -214,5 +321,30 @@ const styles = StyleSheet.create({
   },
   groupLabel: {
     color: '#0F172A',
+  },
+  highlightBox: {
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    borderRadius: 18,
+    padding: 20,
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    gap: 6,
+  },
+  highlightLabel: {
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    color: '#047857',
+  },
+  highlightValue: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  highlightHint: {
+    color: '#334155',
+    fontSize: 13,
+  },
+  highlightSavings: {
+    color: '#047857',
   },
 });
