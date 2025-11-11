@@ -6,8 +6,21 @@ import { getProjects } from '../../config/firebase'
 import LogoutButton from '../../components/LogoutButton'
 import CustomJuniorHeader from '../../components/CustomJuniorHeader'
 import CustomHeader from '../../components/CustomHeader'
+import { useTranslation } from '../../hooks/useTranslation'
 
-const CustomListCard = ({ data, onPress }) => {
+const CustomListCard = ({
+  data,
+  onPress,
+  strings,
+}: {
+  data: any;
+  onPress: () => void;
+  strings: {
+    fallbackName: string;
+    fallbackDetail: string;
+    fallbackSystem: string;
+  };
+}) => {
   return (
     <Surface style={{
       marginVertical: 8,
@@ -28,10 +41,10 @@ const CustomListCard = ({ data, onPress }) => {
         )
       }
       <View style={{ flex: 1 }}>
-        <Text variant="titleMedium">{data.name || 'Unnamed Project'}</Text>
-        <Text variant="bodySmall">{data.detail || 'No description'}</Text>
+        <Text variant="titleMedium">{data.name || strings.fallbackName}</Text>
+        <Text variant="bodySmall">{data.detail || strings.fallbackDetail}</Text>
       </View>
-      <Text style={{ fontWeight: 'bold' }}>{data.systemType || data.type || 'System'}</Text>
+      <Text style={{ fontWeight: 'bold' }}>{data.systemType || data.type || strings.fallbackSystem}</Text>
     </Surface>
   );
 };
@@ -40,6 +53,7 @@ const CustomListCard = ({ data, onPress }) => {
 
 
 const ProjectsScreen = ({ navigation }) => {
+  const { t } = useTranslation()
   const [projects, setProjects] = useState([])
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -86,20 +100,34 @@ const ProjectsScreen = ({ navigation }) => {
     }}>
 
       <CustomHeader
-        label="Solar Projects"
-        subheading="Manage your rooftop solar installations"
+        label={t('projectHeaderTitle')}
+        subheading={t('projectHeaderSubtitle')}
         image_url="https://i.postimg.cc/CLkyNwZT/Screenshot-2025-11-10-at-5-03-23-PM.png"
       />
 
       <List.Section>
-        <CustomJuniorHeader label={'Solar Projects'} action={() => { }} />
+        <CustomJuniorHeader label={t('projectSectionTitle')} action={() => { }} />
         {
           projects && projects.length > 0 ? (
             projects.map((item) => (
-              <CustomListCard key={item.id} data={item} onPress={() => openModal(item)} />
+              <CustomListCard
+                key={item.id}
+                data={item}
+                onPress={() => openModal(item)}
+                strings={{
+                  fallbackName: t('projectCardFallbackName'),
+                  fallbackDetail: t('projectCardFallbackDetail'),
+                  fallbackSystem: t('projectCardFallbackSystem'),
+                }}
+              />
             ))
           ) : (
-            <ActivityIndicator />
+            <View style={{ paddingVertical: 32, alignItems: 'center', gap: 12 }}>
+              <ActivityIndicator />
+              <Text variant="bodyMedium" style={{ color: '#475569' }}>
+                {t('projectEmptyLoading')}
+              </Text>
+            </View>
           )
         }
 
@@ -120,6 +148,7 @@ const ProjectsScreen = ({ navigation }) => {
       {/* ADD PROJECT */}
       <FAB
         icon="solar-power"
+        accessibilityLabel={t('projectFabLabel')}
         style={{
           position: 'absolute',
           margin: 16,
@@ -163,7 +192,7 @@ const ProjectsScreen = ({ navigation }) => {
                 {selectedProject.name}
               </Text>
               <Text variant="bodyMedium">
-                {selectedProject.detail}
+                {selectedProject.detail || t('projectModalDetailFallback')}
               </Text>
               <Text variant="bodySmall" style={{ marginTop: 8, color: 'gray' }}>
                 {selectedProject.systemType || selectedProject.type}

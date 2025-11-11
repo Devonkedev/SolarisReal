@@ -1,11 +1,26 @@
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, View } from 'react-native';
 import RootScreen from './src/router/RootScreen';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { initializeNotifications } from './src/utils/notification';
 import { useAppFonts } from './src/theme/fonts';
+import { TranslationProvider, useTranslationContext } from './src/i18n/TranslationProvider';
+
+const TranslationGate = ({ children }: { children: ReactNode }) => {
+  const { isLoading } = useTranslationContext();
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0B1120' }}>
+        <ActivityIndicator size="large" color="#6EA8FF" />
+      </View>
+    );
+  }
+
+  return <>{children}</>;
+};
 
 
 export default function App() {
@@ -81,7 +96,13 @@ export default function App() {
     );
   }
 
-  return <RootScreen />;
+  return (
+    <TranslationProvider>
+      <TranslationGate>
+        <RootScreen />
+      </TranslationGate>
+    </TranslationProvider>
+  );
 }
 
 

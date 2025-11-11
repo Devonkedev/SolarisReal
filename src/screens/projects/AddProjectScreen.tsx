@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Alert, Image, Platform, TouchableOpacity, View } from 'react-native';
 import { Text, Menu, TextInput as PaperTextInput } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -8,18 +8,12 @@ import CustomHeader from '../../components/CustomHeader';
 import AppTextInput from '../../components/AppTextInput';
 import AppButton from '../../components/AppButton';
 import { layout } from '../../styles/layout';
-
-const OPTIONS = [
-  { label: 'On-grid (Net-metering)', value: 'on-grid' },
-  { label: 'Off-grid (Battery)', value: 'off-grid' },
-  { label: 'Hybrid', value: 'hybrid' },
-  { label: 'Community / Shared', value: 'shared' },
-  { label: 'Other', value: 'other' },
-];
+import { useTranslation } from '../../hooks/useTranslation';
 
 type Props = { navigation: any };
 
 const AddProjectScreen: React.FC<Props> = ({ navigation }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [installer, setInstaller] = useState('');
   const [detail, setDetail] = useState('');
@@ -34,6 +28,17 @@ const AddProjectScreen: React.FC<Props> = ({ navigation }) => {
   // local dropdown state (using react-native-paper Menu)
   const [menuVisible, setMenuVisible] = useState(false);
 
+  const options = useMemo(
+    () => [
+      { label: t('systemOptionOnGrid'), value: 'on-grid' },
+      { label: t('systemOptionOffGrid'), value: 'off-grid' },
+      { label: t('systemOptionHybrid'), value: 'hybrid' },
+      { label: t('systemOptionShared'), value: 'shared' },
+      { label: t('systemOptionOther'), value: 'other' },
+    ],
+    [t]
+  );
+
   const takePicture = async () => {
     try {
       const permission = await ImagePicker.requestCameraPermissionsAsync();
@@ -46,7 +51,7 @@ const AddProjectScreen: React.FC<Props> = ({ navigation }) => {
         const asset = result.assets[0];
         setImageUri(asset.uri);
         setImageBase64(asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : null);
-        setErrors(prev => ({ ...prev, image: '' }));
+        setErrors(prev => ({ ...prev, image: undefined }));
       }
     } catch (err) {
       console.error('Error taking picture:', err);
@@ -66,7 +71,7 @@ const AddProjectScreen: React.FC<Props> = ({ navigation }) => {
         const asset = result.assets[0];
         setImageUri(asset.uri);
         setImageBase64(asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : null);
-        setErrors(prev => ({ ...prev, image: '' }));
+        setErrors(prev => ({ ...prev, image: undefined }));
       }
     } catch (err) {
       console.error('Error selecting image:', err);
@@ -84,18 +89,18 @@ const AddProjectScreen: React.FC<Props> = ({ navigation }) => {
 
   const validate = () => {
     const newErrors: typeof errors = {};
-    if (!name.trim()) newErrors.name = 'Please enter the project/site name.';
-    if (!installer.trim()) newErrors.installer = 'Please enter the installer/vendor name.';
-    if (!detail.trim()) newErrors.detail = 'Please enter project details.';
-    if (!type) newErrors.type = 'Please select system type.';
-    if (!imageBase64) newErrors.image = 'Please add a site photo.';
+    if (!name.trim()) newErrors.name = t('addProjectValidationName');
+    if (!installer.trim()) newErrors.installer = t('addProjectValidationInstaller');
+    if (!detail.trim()) newErrors.detail = t('addProjectValidationDetail');
+    if (!type) newErrors.type = t('addProjectValidationType');
+    if (!imageBase64) newErrors.image = t('addProjectValidationImage');
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = async () => {
     if (!validate()) {
-      Alert.alert('Missing Info', 'Please fill required fields highlighted in the form.');
+      Alert.alert(t('addProjectMissingInfoTitle'), t('addProjectMissingInfoBody'));
       return;
     }
     setLoading(true);
@@ -112,34 +117,36 @@ const AddProjectScreen: React.FC<Props> = ({ navigation }) => {
         createdAt: new Date(),
       };
       await addProject(payload);
-      Alert.alert('Success', 'Project saved!', [{ text: 'OK', onPress: () => navigation.navigate('ProjectsScreen') }]);
+      Alert.alert(t('addProjectSaveSuccessTitle'), t('addProjectSaveSuccessBody'), [
+        { text: t('addProjectSaveSuccessOk'), onPress: () => navigation.navigate('ProjectsScreen') },
+      ]);
     } catch (err) {
       console.error('Error saving project:', err);
-      Alert.alert('Error', 'Something went wrong while saving the project.');
+      Alert.alert(t('addProjectSaveErrorTitle'), t('addProjectSaveErrorBody'));
     } finally {
       setLoading(false);
     }
   };
 
-  const selectedTypeLabel = OPTIONS.find(o => o.value === type)?.label ?? '';
+  const selectedTypeLabel = options.find(o => o.value === type)?.label ?? '';
 
   return (
     <ScrollView contentContainerStyle={layout.scrollContent} style={layout.screen}>
       <CustomHeader
-        label="Add solar project"
-        subheading="Keep a living record of installs, vendors and project artefacts."
+        label={t('addProjectHeaderTitle')}
+        subheading={t('addProjectHeaderSubtitle')}
       />
 
       <View style={[layout.formCard, styles.card]}>
         <AppTextInput
-          label="Project / site name"
+          label={t('addProjectNameLabel')}
           value={name}
           onChangeText={setName}
         />
         {errors.name ? <Text style={styles.errorText}>{errors.name}</Text> : null}
 
         <AppTextInput
-          label="Installer / vendor"
+          label={t('addProjectInstallerLabel')}
           value={installer}
           onChangeText={setInstaller}
         />
@@ -147,26 +154,26 @@ const AddProjectScreen: React.FC<Props> = ({ navigation }) => {
 
         <View>
           <Text variant="labelLarge" style={styles.fieldLabel}>
-            System type
+            {t('addProjectSystemLabel')}
           </Text>
           <Menu
             visible={menuVisible}
             onDismiss={() => setMenuVisible(false)}
             anchor={
               <AppButton mode="outlined" onPress={() => setMenuVisible(true)} style={styles.selector}>
-                {selectedTypeLabel || 'Select system type'}
+                {selectedTypeLabel || t('addProjectSystemPlaceholder')}
               </AppButton>
             }
             contentStyle={styles.menuContent}
           >
-            {OPTIONS.map(opt => (
+            {options.map(opt => (
               <Menu.Item
                 key={opt.value}
                 title={opt.label}
                 onPress={() => {
                   setType(opt.value);
                   setMenuVisible(false);
-                  setErrors(prev => ({ ...prev, type: '' }));
+                  setErrors(prev => ({ ...prev, type: undefined }));
                 }}
               />
             ))}
@@ -176,7 +183,7 @@ const AddProjectScreen: React.FC<Props> = ({ navigation }) => {
 
         <TouchableOpacity onPress={() => setShowDatePicker(true)} activeOpacity={0.7}>
           <AppTextInput
-            label="Installation date"
+            label={t('addProjectDateLabel')}
             value={installationDate.toLocaleDateString()}
             editable={false}
             right={<PaperTextInput.Icon icon="calendar" />}
@@ -197,7 +204,7 @@ const AddProjectScreen: React.FC<Props> = ({ navigation }) => {
         )}
 
         <AppTextInput
-          label="Project details / notes"
+          label={t('addProjectDetailLabel')}
           value={detail}
           onChangeText={setDetail}
           multiline
@@ -205,7 +212,7 @@ const AddProjectScreen: React.FC<Props> = ({ navigation }) => {
         {errors.detail ? <Text style={styles.errorText}>{errors.detail}</Text> : null}
 
         <AppButton icon="camera" mode="outlined" onPress={showImageOptions} style={styles.imageButton}>
-          {imageUri ? 'Change image' : 'Add site photo'}
+          {imageUri ? t('addProjectImageChange') : t('addProjectImageAdd')}
         </AppButton>
         {errors.image ? <Text style={styles.errorText}>{errors.image}</Text> : null}
 
@@ -218,7 +225,7 @@ const AddProjectScreen: React.FC<Props> = ({ navigation }) => {
           disabled={loading}
           icon="content-save"
         >
-          Save project
+          {t('addProjectSaveCta')}
         </AppButton>
 
         <AppButton
@@ -228,7 +235,7 @@ const AddProjectScreen: React.FC<Props> = ({ navigation }) => {
           disabled={loading}
           icon="arrow-left"
         >
-          Go Back
+          {t('addProjectBackCta')}
         </AppButton>
       </View>
     </ScrollView>

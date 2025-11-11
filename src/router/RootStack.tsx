@@ -112,7 +112,7 @@ const BottomNavigation = () => {
           ),
         }}
       />
-      
+
       <Tab.Screen
         name="Tracker"
         component={TrackerStack}
