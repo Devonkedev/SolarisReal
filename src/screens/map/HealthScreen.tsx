@@ -5,6 +5,7 @@ import { FAB, Surface, Text } from 'react-native-paper';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import CustomJuniorHeader from '../../components/CustomJuniorHeader';
 import MapView, { Marker, Polygon, Region } from 'react-native-maps';
+import { useTranslation } from '../../hooks/useTranslation';
 
 type SolarHeatTile = {
   coordinates: Array<{ latitude: number; longitude: number }>;
@@ -127,6 +128,7 @@ const generateSolarHeatTiles = (region: Region, date: Date, gridSize = 12): Sola
 };
 
 const ShadowMapSection = ({ date }: { date?: Date }) => {
+  const { translate } = useTranslation();
   const [region, setRegion] = useState<Region>({
     latitude: 28.6139,
     longitude: 77.209,
@@ -179,11 +181,11 @@ const ShadowMapSection = ({ date }: { date?: Date }) => {
         elevation={2}
       >
         <Text variant="labelSmall" style={{ color: '#ffffff', fontWeight: '600', letterSpacing: 0.5 }}>
-          Solar Potential
+          {translate('Solar potential')}
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
           <Text variant="labelSmall" style={{ color: '#f5f5f5', marginRight: 8 }}>
-            Low
+            {translate('Low')}
           </Text>
           <View style={{ flexDirection: 'row', height: 8, width: 112, borderRadius: 4, overflow: 'hidden' }}>
             {legendStops.map((color, idx) => (
@@ -191,7 +193,7 @@ const ShadowMapSection = ({ date }: { date?: Date }) => {
             ))}
           </View>
           <Text variant="labelSmall" style={{ color: '#f5f5f5', marginLeft: 8 }}>
-            High
+            {translate('High')}
           </Text>
         </View>
         <Text variant="labelSmall" style={{ color: '#d7d7d7', marginTop: 6 }}>
@@ -203,35 +205,35 @@ const ShadowMapSection = ({ date }: { date?: Date }) => {
 };
 
 const HealthScreen = ({ navigation }) => {
+  const { translate } = useTranslation();
   const [selectedDate] = useState<Date>(() => new Date());
 
   return (
     <View style={{ flex: 1 }}>
       <ScrollView>
         <CustomHeader
-          label={'Solar Shadow Map'}
-          subheading={'Visualize sunlight & shadows based on your location'}
+          label={translate('Solar shadow map')}
+          subheading={translate('Visualize sunlight & shadows based on your location')}
           image_url={
             'https://cdn-icons-png.flaticon.com/512/869/869869.png'
           }
         />
 
-        <CustomJuniorHeader label={'Shadow Visualization'} action={() => {}} />
+        <CustomJuniorHeader label={translate('Shadow visualization')} action={() => {}} />
         <View style={{ height: hp(50), borderRadius: 16, overflow: 'hidden', marginHorizontal: wp(3) }}>
           <ShadowMapSection date={selectedDate} />
         </View>
 
         <View style={{ marginVertical: hp(2), paddingHorizontal: wp(3) }}>
           <Text variant="bodyMedium">
-            Use the map above to visualize how solar potential varies across the selected area. The heat map
-            combines sun angle, haze, and terrain roughness factors to highlight where rooftop solar can yield
-            stronger production throughout the day.
+            {translate('Use the map above to visualize how solar potential varies across the selected area. The heat map combines sun angle, haze, and terrain roughness factors to highlight where rooftop solar can yield stronger production throughout the day.')}
           </Text>
         </View>
       </ScrollView>
 
       <FAB
         icon="refresh"
+        accessibilityLabel={translate('Go back')}
         style={{
           position: 'absolute',
           margin: 16,

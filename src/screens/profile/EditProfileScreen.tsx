@@ -4,8 +4,10 @@ import CustomHeader from '../../components/CustomHeader';
 import { Button, FAB, TextInput } from 'react-native-paper';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { auth, getUserProfile, updateUserProfile } from '../../config/firebase';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const EditProfileScreen = ({ navigation }) => {
+  const { translate } = useTranslation();
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [dob, setDob] = useState('');
@@ -23,7 +25,7 @@ const EditProfileScreen = ({ navigation }) => {
         setPhone(profile.phone || '');
       } catch (error) {
         console.error('Failed to fetch profile:', error);
-        Alert.alert('Error', 'Unable to fetch profile data.');
+        Alert.alert(translate('Error'), translate('Unable to fetch profile data.'));
       } finally {
         setLoading(false);
       }
@@ -41,10 +43,10 @@ const EditProfileScreen = ({ navigation }) => {
         dob,
         phone,
       });
-      Alert.alert('Success', 'Profile updated successfully!');
+      Alert.alert(translate('Success'), translate('Profile updated successfully!'));
     } catch (error) {
       console.error('Error updating profile:', error);
-      Alert.alert('Error', 'Failed to update profile.');
+      Alert.alert(translate('Error'), translate('Failed to update profile.'));
     } finally {
       setLoading(false);
     }
@@ -60,8 +62,8 @@ const EditProfileScreen = ({ navigation }) => {
     }}>
       <ScrollView contentContainerStyle={{ padding: wp(4) }}>
         <CustomHeader
-          label={'Profile'}
-          subheading={'Here you can edit your profile.'}
+          label={translate('Profile')}
+          subheading={translate('Here you can edit your profile.')}
           image_url={
             'https://i.postimg.cc/850GGdyL/Screenshot-2025-09-27-at-1-13-48-PM.png'
           }
@@ -69,13 +71,13 @@ const EditProfileScreen = ({ navigation }) => {
 
         <View style={{ marginBottom: wp(6) }}>
           <TextInput
-            label="Name"
+            label={translate('Name')}
             value={name}
             onChangeText={setName}
             style={{ marginBottom: wp(3) }}
           />
           <TextInput
-            label="Email"
+            label={translate('Email')}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -83,17 +85,17 @@ const EditProfileScreen = ({ navigation }) => {
             style={{ marginBottom: wp(3) }}
           />
           <TextInput
-            label="Phone"
+            label={translate('Phone')}
             value={phone}
             onChangeText={setPhone}
             keyboardType="phone-pad"
             style={{ marginBottom: wp(3) }}
           />
           <TextInput
-            label="Date of Birth (YYYY-MM-DD)"
+            label={translate('Date of birth (YYYY-MM-DD)')}
             value={dob}
             onChangeText={setDob}
-            placeholder="1990-05-15"
+            placeholder={translate('1990-05-15')}
             style={{ marginBottom: wp(3) }}
           />
         </View>
@@ -105,7 +107,7 @@ const EditProfileScreen = ({ navigation }) => {
           disabled={loading}
           style={{ marginBottom: wp(5) }}
         >
-          Save Profile
+          {translate('Save profile')}
         </Button>
 
         {/* <Button mode="outlined" onPress={handleLogout}>
@@ -115,7 +117,7 @@ const EditProfileScreen = ({ navigation }) => {
         <Button mode="outlined" onPress={() => {
           navigation.replace("ProfileScreen");
         }}>
-          Exit
+          {translate('Exit')}
         </Button>
 
 
@@ -129,6 +131,7 @@ const EditProfileScreen = ({ navigation }) => {
           bottom: 0,
         }}
         onPress={handleSaveProfile}
+        accessibilityLabel={translate('Save profile')}
       />
     </View>
   );
