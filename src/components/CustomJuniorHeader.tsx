@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
+import { colors, radii, spacing } from '../styles/tokens';
 
 type Props = {
   label?: string;
@@ -15,9 +16,12 @@ const CustomJuniorHeader: React.FC<Props> = ({ label, actionSlot, action, action
   return (
     <View style={styles.container}>
       {label ? (
-        <Text variant="titleMedium" style={styles.title} numberOfLines={1}>
-          {label}
-        </Text>
+        <View style={styles.titleWrap}>
+          <Text variant="titleMedium" style={styles.title} numberOfLines={1}>
+            {label}
+          </Text>
+          <View style={styles.underline} />
+        </View>
       ) : (
         <View />
       )}
@@ -38,24 +42,30 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     justifyContent: 'space-between',
-    paddingVertical: 12,
-    marginBottom: 18,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(148, 163, 184, 0.4)',
-    paddingHorizontal: 4,
-    minHeight: 48,
+    marginBottom: spacing.lg,
+  },
+  titleWrap: {
+    flex: 1,
+    paddingRight: spacing.md,
+    gap: spacing.xs / 2,
   },
   title: {
-    color: '#0F172A',
+    color: colors.primaryText,
     flex: 1,
-    marginRight: 12,
+    fontWeight: '700',
   },
   action: {
-    color: '#1E3A8A',
+    color: colors.primary,
     flexShrink: 0,
     fontWeight: '600',
+  },
+  underline: {
+    width: 48,
+    height: 4,
+    borderRadius: radii.pill,
+    backgroundColor: colors.primary,
   },
 });
 

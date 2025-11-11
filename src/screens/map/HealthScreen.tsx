@@ -1,11 +1,12 @@
-import { View, ScrollView } from 'react-native';
-import React, { useMemo, useState } from 'react';
+import { View, ScrollView, StyleSheet } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
 import CustomHeader from '../../components/CustomHeader';
-import { FAB, Surface, Text } from 'react-native-paper';
+import { ActivityIndicator, FAB, Surface, Text } from 'react-native-paper';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import CustomJuniorHeader from '../../components/CustomJuniorHeader';
 import MapView, { Marker, Polygon, Region } from 'react-native-maps';
 import { useTranslation } from '../../hooks/useTranslation';
+import { colors, spacing } from '../../styles/tokens';
 
 type SolarHeatTile = {
   coordinates: Array<{ latitude: number; longitude: number }>;
@@ -127,14 +128,23 @@ const generateSolarHeatTiles = (region: Region, date: Date, gridSize = 12): Sola
   return tiles;
 };
 
-const ShadowMapSection = ({ date }: { date?: Date }) => {
+const DEFAULT_REGION: Region = {
+  latitude: 28.6139,
+  longitude: 77.209,
+  latitudeDelta: 0.04,
+  longitudeDelta: 0.04,
+};
+
+const ShadowMapSection = ({
+  date,
+  region,
+  onRegionChange,
+}: {
+  date?: Date;
+  region: Region | null;
+  onRegionChange: (region: Region) => void;
+}) => {
   const { translate } = useTranslation();
-  const [region, setRegion] = useState<Region>({
-    latitude: 28.6139,
-    longitude: 77.209,
-    latitudeDelta: 0.04,
-    longitudeDelta: 0.04,
-  });
 
   const effectiveDate = useMemo(() => {
     if (!date) return new Date();
@@ -142,7 +152,10 @@ const ShadowMapSection = ({ date }: { date?: Date }) => {
     return new Date(date);
   }, [date]);
 
-  const tiles = useMemo(() => generateSolarHeatTiles(region, effectiveDate), [region, effectiveDate]);
+  const tiles = useMemo(() => {
+    if (!region) return [];
+    return generateSolarHeatTiles(region, effectiveDate);
+  }, [region, effectiveDate]);
 
   const legendStops = useMemo(
     () =>
@@ -153,9 +166,20 @@ const ShadowMapSection = ({ date }: { date?: Date }) => {
     []
   );
 
+  if (!region) {
+    return (
+      <View style={styles.mapLoader}>
+        <ActivityIndicator animating size="large" color="#2563EB" />
+        <Text variant="bodyMedium" style={styles.mapLoaderText}>
+          {translate('Fetching your location...')}
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1 }}>
-      <MapView style={{ flex: 1 }} region={region} onRegionChangeComplete={(r) => setRegion(r)}>
+      <MapView style={{ flex: 1 }} region={region} onRegionChangeComplete={onRegionChange}>
         {tiles.map((tile, i) => (
           <Polygon
             key={`shadow-${i}`}
@@ -204,9 +228,49 @@ const ShadowMapSection = ({ date }: { date?: Date }) => {
   );
 };
 
-const HealthScreen = ({ navigation }) => {
+const HealthScreen = ({ navigation, route }) => {
   const { translate } = useTranslation();
   const [selectedDate] = useState<Date>(() => new Date());
+  const [mapRegion, setMapRegion] = useState<Region | null>(null);
+  const [locationStatus, setLocationStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+
+  useEffect(() => {
+    const userRegionFromParams: Region | null = route?.params?.region ?? null;
+    if (userRegionFromParams) {
+      setMapRegion(userRegionFromParams);
+      setLocationStatus('ready');
+      return;
+    }
+
+    const fetchLocation = async () => {
+      try {
+        const response = await fetch('https://ipapi.co/json/');
+        if (!response.ok) {
+          throw new Error('Failed to fetch approximate location');
+        }
+        const data = await response.json();
+        if (typeof data.latitude !== 'number' || typeof data.longitude !== 'number') {
+          throw new Error('Incomplete location response');
+        }
+
+        const region: Region = {
+          latitude: data.latitude,
+          longitude: data.longitude,
+          latitudeDelta: 0.6,
+          longitudeDelta: 0.6,
+        };
+
+        setMapRegion(region);
+        setLocationStatus('ready');
+      } catch (err) {
+        console.warn('Unable to fetch location', err);
+        setMapRegion(DEFAULT_REGION);
+        setLocationStatus('error');
+      }
+    };
+
+    fetchLocation();
+  }, [route]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -221,8 +285,17 @@ const HealthScreen = ({ navigation }) => {
 
         <CustomJuniorHeader label={translate('Shadow visualization')} action={() => {}} />
         <View style={{ height: hp(50), borderRadius: 16, overflow: 'hidden', marginHorizontal: wp(3) }}>
-          <ShadowMapSection date={selectedDate} />
+          <ShadowMapSection
+            date={selectedDate}
+            region={mapRegion}
+            onRegionChange={setMapRegion}
+          />
         </View>
+        {locationStatus === 'error' ? (
+          <Text variant="bodySmall" style={styles.locationHint}>
+            {translate('We could not access your precise location. Showing a default view instead.')}
+          </Text>
+        ) : null}
 
         <View style={{ marginVertical: hp(2), paddingHorizontal: wp(3) }}>
           <Text variant="bodyMedium">
@@ -247,3 +320,21 @@ const HealthScreen = ({ navigation }) => {
 };
 
 export default HealthScreen;
+
+const styles = StyleSheet.create({
+  mapLoader: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    backgroundColor: 'rgba(15, 23, 42, 0.04)',
+  },
+  mapLoaderText: {
+    color: colors.primaryText,
+  },
+  locationHint: {
+    marginHorizontal: wp(3),
+    marginTop: spacing.sm,
+    color: colors.secondaryText,
+  },
+});

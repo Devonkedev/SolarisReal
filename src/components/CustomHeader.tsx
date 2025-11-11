@@ -3,6 +3,7 @@ import { View, Image, StyleSheet } from 'react-native';
 import { Text, Surface } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from '../hooks/useTranslation';
+import { colors, radii, shadows, spacing } from '../styles/tokens';
 
 type Props = {
   label?: string;
@@ -18,7 +19,7 @@ const CustomHeader: React.FC<Props> = ({ label, subheading, image_url }) => {
   return (
     <Surface style={styles.container} elevation={3}>
       <LinearGradient
-        colors={['#0F172A', '#1E3A8A']}
+        colors={[colors.palette.indigo900, colors.palette.indigo600]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.gradient}
@@ -42,39 +43,44 @@ const CustomHeader: React.FC<Props> = ({ label, subheading, image_url }) => {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    borderRadius: 0,
+    borderRadius: radii.lg,
     overflow: 'hidden',
-    marginBottom: 24,
+    marginBottom: spacing.xl,
+    backgroundColor: 'transparent',
+    ...shadows.soft,
   },
   gradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingVertical: 24,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.xl,
   },
   textContainer: {
     flex: 1,
-    paddingRight: 16,
-    gap: 8,
+    paddingRight: spacing.lg,
+    gap: spacing.sm,
   },
   title: {
-    color: '#F8FAFC',
-    fontSize: 24,
+    color: colors.card,
+    fontSize: 26,
+    letterSpacing: 0.2,
   },
   subtitle: {
-    color: 'rgba(241, 245, 249, 0.8)',
-    fontSize: 16,
+    color: 'rgba(248, 250, 252, 0.85)',
+    fontSize: 15,
     lineHeight: 22,
+    maxWidth: '100%',
+    flexShrink: 1,
   },
   imageWrapper: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
+    width: 88,
+    height: 88,
+    borderRadius: radii.lg,
     overflow: 'hidden',
-    borderWidth: 3,
-    borderColor: 'rgba(255,255,255,0.45)',
-    backgroundColor: 'rgba(15, 23, 42, 0.4)',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.5)',
+    backgroundColor: colors.palette.indigo700,
   },
   image: {
     width: '100%',

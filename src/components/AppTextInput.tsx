@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { TextInput, TextInputProps } from 'react-native-paper';
+import { colors, radii, spacing } from '../styles/tokens';
 
 type Props = TextInputProps & {
   fullWidth?: boolean;
@@ -24,22 +25,24 @@ const AppTextInput: React.FC<Props> = ({ style, outlineStyle, contentStyle, full
 const styles = StyleSheet.create({
   input: {
     minHeight: 56,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    borderRadius: radii.md,
+    backgroundColor: colors.card,
   },
   fullWidth: {
     width: '100%',
   },
   outline: {
-    borderWidth: 2,
-    borderRadius: 18,
+    borderWidth: 1.5,
+    borderRadius: radii.md,
+    borderColor: colors.border,
   },
   content: {
     fontSize: 16,
+    paddingVertical: spacing.xs,
   },
   multiline: {
     minHeight: 120,
-    paddingTop: 16,
+    paddingTop: spacing.md,
   },
 });
 

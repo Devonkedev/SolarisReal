@@ -6,6 +6,7 @@ import AppButton from '../../components/AppButton';
 import { layout } from '../../styles/layout';
 import { solarVendors } from '../../data/solarVendors';
 import { useTranslation } from '../../hooks/useTranslation';
+import { colors, radii, spacing, shadows } from '../../styles/tokens';
 
 const SubsidyVendorsScreen = ({ route, navigation }) => {
   const { translate } = useTranslation();
@@ -44,7 +45,12 @@ const SubsidyVendorsScreen = ({ route, navigation }) => {
           </Text>
           {summary && (
             <Surface style={styles.summarySurface} elevation={1}>
-              <Text variant="titleMedium">{translate('Your solar brief')}</Text>
+              <View style={styles.summaryHeader}>
+                <Text variant="labelLarge" style={styles.summaryEyebrow}>
+                  {translate('Your solar brief')}
+                </Text>
+                <Text style={styles.summaryBadge}>{translate('Auto-calculated')}</Text>
+              </View>
               <Text style={styles.summaryHighlight}>
                 {translate('{size} kW system target').replace('{size}', Number(summary.recommendedKw).toFixed(1))}
               </Text>
@@ -110,31 +116,54 @@ export default SubsidyVendorsScreen;
 
 const styles = StyleSheet.create({
   formCard: {
-    gap: 16,
+    gap: spacing.md,
   },
   introCopy: {
-    color: '#0F172A',
+    color: colors.secondaryText,
   },
   summarySurface: {
-    borderRadius: 20,
-    padding: 20,
-    gap: 8,
-    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+    borderRadius: radii.lg,
+    padding: spacing.lg,
+    gap: spacing.sm,
+    backgroundColor: colors.cardAlt,
+    borderWidth: 1,
+    borderColor: colors.borderMuted,
+    ...shadows.soft,
+  },
+  summaryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  summaryEyebrow: {
+    color: colors.secondaryText,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  summaryBadge: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs / 1.5,
+    backgroundColor: 'rgba(37, 99, 235, 0.12)',
+    borderRadius: radii.pill,
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: '600',
   },
   summaryHighlight: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '700',
-    color: '#047857',
+    color: colors.primaryText,
   },
   summaryHint: {
-    color: '#0F172A',
+    color: colors.tertiaryText,
   },
   vendorCard: {
-    borderRadius: 24,
-    padding: 20,
-    gap: 12,
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 20,
+    borderRadius: radii.lg,
+    padding: spacing.lg,
+    gap: spacing.md,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.borderMuted,
   },
   vendorHeader: {
     flexDirection: 'row',
@@ -142,33 +171,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   ratingChip: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: 'rgba(250, 204, 21, 0.16)',
   },
   priceRange: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#0F172A',
+    color: colors.primaryText,
   },
   basePrice: {
-    color: '#334155',
+    color: colors.secondaryText,
   },
   metaLine: {
-    color: '#475569',
+    color: colors.tertiaryText,
   },
   highlightRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: spacing.xs,
   },
   highlightChip: {
-    backgroundColor: '#E0F2FE',
+    backgroundColor: 'rgba(14, 116, 144, 0.12)',
   },
   footerActions: {
-    paddingHorizontal: 20,
-    paddingVertical: 32,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xl,
   },
   separator: {
-    height: 12,
+    height: spacing.md,
   },
 });
 

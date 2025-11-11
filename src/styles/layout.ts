@@ -1,33 +1,34 @@
 import { StyleSheet } from 'react-native';
+import { colors, radii, shadows, spacing } from './tokens';
 
 export const layout = StyleSheet.create({
   screen: {
     flex: 1,
+    width: '100%',
+    backgroundColor: 'transparent',
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingVertical: 32,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.xxl,
     alignItems: 'center',
-    gap: 32,
+    gap: spacing.xxl,
+    width: '100%',
   },
   formCard: {
     width: '100%',
     maxWidth: 440,
-    borderRadius: 28,
-    padding: 24,
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    shadowColor: '#0B1120',
-    shadowOpacity: 0.08,
-    shadowOffset: { width: 0, height: 16 },
-    shadowRadius: 32,
-    elevation: 6,
-    gap: 16,
+    borderRadius: radii.xl,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.xl,
+    backgroundColor: colors.card,
+    gap: spacing.lg,
+    ...shadows.card,
   },
   sectionGap: {
-    gap: 16,
+    gap: spacing.lg,
   },
   horizontalGap: {
-    gap: 12,
+    gap: spacing.sm,
   },
   centered: {
     alignItems: 'center',

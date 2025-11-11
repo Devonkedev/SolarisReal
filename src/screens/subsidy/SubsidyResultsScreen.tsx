@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Alert, Image, View, Linking } from 'react-native';
-import { Text, Surface, Chip } from 'react-native-paper';
+import { Text, Surface, Chip, List } from 'react-native-paper';
 import CustomHeader from '../../components/CustomHeader';
 import CustomJuniorHeader from '../../components/CustomJuniorHeader';
 import * as ImagePicker from 'expo-image-picker';
@@ -8,6 +8,7 @@ import AppButton from '../../components/AppButton';
 import { layout } from '../../styles/layout';
 import { getSchemeFilterOptions, SchemeCoverage } from '../../utils/schemeMatcher';
 import { useTranslation } from '../../hooks/useTranslation';
+import { colors, radii, spacing } from '../../styles/tokens';
 
 const SubsidyResultsScreen = ({ route, navigation }) => {
   const { answers, result, matches = [] } = route.params || {};
@@ -19,6 +20,7 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
   const [coverageFilter, setCoverageFilter] = useState<'all' | SchemeCoverage>('all');
   const [ownershipFilter, setOwnershipFilter] = useState<'all' | 'owner' | 'tenant'>('all');
   const [gridFilter, setGridFilter] = useState<'all' | 'grid' | 'off-grid'>('all');
+  const [expandedSchemeId, setExpandedSchemeId] = useState<string | null>(null);
 
   if (!result) {
     return (
@@ -37,6 +39,32 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
     }
     return systemKw * 1100 * 6;
   }, [answers, systemKw]);
+
+  const profileTags = useMemo(() => {
+    const tags: string[] = [];
+    if (answers?.state) {
+      tags.push(answers.state);
+    }
+    if (answers?.consumerSegment) {
+      const segmentMap: Record<string, string> = {
+        residential: translate('Residential'),
+        agricultural: translate('Agricultural'),
+        community: translate('Community / cooperative'),
+      };
+      tags.push(segmentMap[answers.consumerSegment] ?? answers.consumerSegment);
+    }
+    if (answers?.ownership) {
+      tags.push(answers.ownership === 'yes' ? translate('Owner occupied') : translate('Tenant / shared ownership'));
+    }
+    if (answers?.gridConnection) {
+      tags.push(
+        answers.gridConnection === 'grid'
+          ? translate('Grid-connected site')
+          : translate('Off-grid / unreliable grid')
+      );
+    }
+    return tags;
+  }, [answers, translate]);
 
   const docs = useMemo(
     () => [
@@ -158,6 +186,19 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
           </Text>
         </Surface>
 
+        {profileTags.length > 0 && (
+          <Surface style={[styles.surface, styles.personaSurface]} elevation={1}>
+            <Text variant="titleMedium">{translate('Your profile snapshot')}</Text>
+            <View style={styles.tagRow}>
+              {profileTags.map(tag => (
+                <Chip key={tag} style={styles.tagChip}>
+                  {tag}
+                </Chip>
+              ))}
+            </View>
+          </Surface>
+        )}
+
         <Surface style={styles.surface} elevation={1}>
           <Text variant="titleMedium">{translate('Cost breakdown')}</Text>
           <Text>
@@ -275,34 +316,64 @@ const SubsidyResultsScreen = ({ route, navigation }) => {
               {translate('No programmes match the selected filters. Try loosening them to see more options.')}
             </Text>
           ) : (
-            filteredMatches.map(({ scheme, matchScore, reasons }) => (
-              <View key={scheme.id} style={styles.schemeCard}>
-                <Text style={styles.schemeTitle}>{scheme.name}</Text>
-                <Text style={styles.schemeSubtitle}>{scheme.administrator}</Text>
-                <Text>{translate('Match score')}: {matchScore.toFixed(1)}</Text>
-                <Text>{translate('Subsidy type')}: {scheme.subsidyType}</Text>
-                <Text>{translate('Benefit')}: {scheme.benefit}</Text>
-                <Text style={styles.schemeReasonsLabel}>{translate('Why it fits')}:</Text>
-                {reasons.map((reason, idx) => (
-                  <Text key={idx} style={styles.schemeReason}>
-                    • {reason}
-                  </Text>
-                ))}
-                <Text>{translate('Application')}: {scheme.applicationProcess}</Text>
-                {scheme.applicationUrl ? (
-                  <AppButton mode="outlined" onPress={() => handleOpenUrl(scheme.applicationUrl)} compact>
-                    {translate('Open portal')}
-                  </AppButton>
-                ) : (
-                  <AppButton mode="outlined" onPress={() => handleOpenUrl()} compact>
-                    {translate('See details')}
-                  </AppButton>
-                )}
-                <Text style={styles.schemeMeta}>{translate('Timeline')}: {scheme.timeline}</Text>
-                <Text style={styles.schemeMeta}>{translate('Vendors')}: {scheme.vendorInfo}</Text>
-                <Text style={styles.schemeMeta}>{translate('Notes')}: {scheme.notes}</Text>
-              </View>
-            ))
+            <List.Section style={styles.schemeList}>
+              {filteredMatches.map(({ scheme, matchScore, reasons }) => {
+                const isExpanded = expandedSchemeId === scheme.id;
+                return (
+                  <List.Accordion
+                    key={scheme.id}
+                    title={scheme.name}
+                    description={`${translate('Administered by')}: ${scheme.administrator}`}
+                    expanded={isExpanded}
+                    onPress={() => setExpandedSchemeId(prev => (prev === scheme.id ? null : scheme.id))}
+                    titleStyle={styles.schemeTitle}
+                    descriptionStyle={styles.schemeDescription}
+                    style={styles.schemeAccordion}
+                  >
+                    <View style={styles.schemeBody}>
+                      <Text style={styles.schemeMetaLine}>
+                        {translate('Match score')}: {matchScore.toFixed(1)}
+                      </Text>
+                      <Text style={styles.schemeMetaLine}>
+                        {translate('Subsidy type')}: {scheme.subsidyType}
+                      </Text>
+                      <Text style={styles.schemeMetaLine}>
+                        {translate('Benefit')}: {scheme.benefit}
+                      </Text>
+                      <Text style={[styles.schemeMetaLine, styles.schemeReasonsLabel]}>
+                        {translate('Why it fits')}:
+                      </Text>
+                      {reasons.map((reason, idx) => (
+                        <Text key={idx} style={styles.schemeReason}>
+                          • {reason}
+                        </Text>
+                      ))}
+                      <Text style={styles.schemeMetaLine}>
+                        {translate('Application')}: {scheme.applicationProcess}
+                      </Text>
+                      {scheme.applicationUrl ? (
+                        <AppButton mode='outlined' onPress={() => handleOpenUrl(scheme.applicationUrl)} compact>
+                          {translate('Open portal')}
+                        </AppButton>
+                      ) : (
+                        <AppButton mode='outlined' onPress={() => handleOpenUrl()} compact>
+                          {translate('See details')}
+                        </AppButton>
+                      )}
+                      <Text style={styles.schemeMeta}>
+                        {translate('Timeline')}: {scheme.timeline}
+                      </Text>
+                      <Text style={styles.schemeMeta}>
+                        {translate('Vendors')}: {scheme.vendorInfo}
+                      </Text>
+                      <Text style={styles.schemeMeta}>
+                        {translate('Notes')}: {scheme.notes}
+                      </Text>
+                    </View>
+                  </List.Accordion>
+                );
+              })}
+            </List.Section>
           )}
         </Surface>
 
@@ -325,82 +396,118 @@ export default SubsidyResultsScreen;
 
 const styles = StyleSheet.create({
   cardStack: {
-    gap: 20,
+    gap: spacing.xl,
   },
   surface: {
-    borderRadius: 24,
-    padding: 20,
-    gap: 12,
-    backgroundColor: 'rgba(255,255,255,0.95)',
+    borderRadius: radii.lg,
+    padding: spacing.lg,
+    gap: spacing.md,
+    backgroundColor: colors.cardAlt,
+    borderWidth: 1,
+    borderColor: colors.borderMuted,
   },
   matchSurface: {
-    gap: 16,
+    gap: spacing.lg,
   },
   highlight: {
-    color: '#1E3A8A',
+    color: colors.primary,
+  },
+  personaSurface: {
+    gap: spacing.sm,
+  },
+  tagRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  tagChip: {
+    backgroundColor: colors.palette.mint100,
+    marginBottom: spacing.xs / 2,
   },
   total: {
-    marginTop: 6,
+    marginTop: spacing.xs,
     fontWeight: '700',
+    color: colors.primaryText,
   },
   imageButton: {
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   previewImage: {
     width: '100%',
     height: 220,
-    borderRadius: 20,
+    borderRadius: radii.lg,
+    marginTop: spacing.sm,
   },
   errorText: {
     color: '#b00020',
   },
-  schemeCard: {
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(148, 163, 184, 0.35)',
-    gap: 6,
-  },
   schemeTitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontFamily: 'OpenSauce-Bold',
+    color: colors.primaryText,
   },
-  schemeSubtitle: {
-    fontStyle: 'italic',
-    color: '#475569',
+  schemeDescription: {
+    color: colors.secondaryText,
   },
   schemeReasonsLabel: {
-    marginTop: 6,
+    marginTop: spacing.xs,
     fontFamily: 'OpenSauce-Bold',
+    color: colors.primaryText,
   },
   schemeReason: {
-    marginLeft: 4,
+    marginLeft: spacing.xs,
+    color: colors.secondaryText,
   },
   schemeMeta: {
-    color: '#4B5563',
+    color: colors.tertiaryText,
     fontSize: 13,
   },
+  schemeMetaLine: {
+    color: colors.secondaryText,
+    marginBottom: spacing.xs / 1.5,
+  },
+  schemeList: {
+    backgroundColor: 'transparent',
+  },
+  schemeAccordion: {
+    backgroundColor: colors.card,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    borderColor: colors.borderMuted,
+    marginBottom: spacing.sm,
+  },
+  schemeBody: {
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.md,
+  },
   filterContainer: {
-    gap: 12,
-    marginBottom: 8,
+    gap: spacing.md,
+    marginBottom: spacing.sm,
   },
   filterGroup: {
-    gap: 6,
+    gap: spacing.xs,
+    backgroundColor: colors.card,
+    borderRadius: radii.md,
+    padding: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.borderMuted,
   },
   chipRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: spacing.xs,
   },
   chip: {
-    borderRadius: 16,
+    borderRadius: radii.pill,
   },
   filterLabel: {
-    color: '#1E293B',
+    color: colors.primaryText,
   },
   vendorCta: {
-    gap: 16,
+    gap: spacing.md,
   },
   vendorCopy: {
-    color: '#0F172A',
+    color: colors.secondaryText,
   },
 });

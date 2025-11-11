@@ -1,7 +1,6 @@
-import React, { useMemo, useState } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
-import { RadioButton, Text } from 'react-native-paper';
-import CustomHeader from '../../components/CustomHeader';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { View, ScrollView, StyleSheet, Animated, Easing } from 'react-native';
+import { SegmentedButtons, Text } from 'react-native-paper';
 import CustomJuniorHeader from '../../components/CustomJuniorHeader';
 import { estimateSubsidy, estimateSystemSizeKw } from '../../utils/subsidyCalculator';
 import { matchSubsidySchemes } from '../../utils/schemeMatcher';
@@ -9,6 +8,9 @@ import AppTextInput from '../../components/AppTextInput';
 import AppButton from '../../components/AppButton';
 import { layout } from '../../styles/layout';
 import { useTranslation } from '../../hooks/useTranslation';
+import { colors, radii, shadows, spacing } from '../../styles/tokens';
+import AppSelect from '../../components/AppSelect';
+import { LinearGradient } from 'expo-linear-gradient';
 
 
 const SubsidyEligibilityScreen = ({ navigation }) => {
@@ -104,6 +106,7 @@ const SubsidyEligibilityScreen = ({ navigation }) => {
   const [annualConsumption, setAnnualConsumption] = useState('');
   const [monthlyBill, setMonthlyBill] = useState('');
   const [gridConnection, setGridConnection] = useState<'grid' | 'off-grid'>('grid');
+  const [progressTrackWidth, setProgressTrackWidth] = useState(0);
 
   const areaNum = useMemo(() => parseFloat(roofArea) || 0, [roofArea]);
   const consumptionNum = useMemo(() => parseFloat(annualConsumption) || 0, [annualConsumption]);
@@ -164,18 +167,135 @@ const SubsidyEligibilityScreen = ({ navigation }) => {
     });
   };
 
+  const stepsMeta = useMemo(
+    () => [
+      { id: 1 as const, label: translate('Size your system') },
+      { id: 2 as const, label: translate('See your impact') },
+      { id: 3 as const, label: translate('Match programmes') },
+    ],
+    [translate]
+  );
+
+  const progressAnim = useRef(new Animated.Value(currentStep / stepsMeta.length));
+
+  useEffect(() => {
+    Animated.timing(progressAnim.current, {
+      toValue: currentStep / stepsMeta.length,
+      duration: 280,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: false,
+    }).start();
+  }, [currentStep, stepsMeta.length]);
+
+  const renderStepper = () => (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <View style={styles.stepper}>
+        {stepsMeta.map((step, index) => {
+          const status = currentStep === step.id ? 'active' : currentStep > step.id ? 'complete' : 'pending';
+          return (
+            <React.Fragment key={step.id}>
+              <View style={styles.stepItem}>
+                <View
+                  style={[
+                    styles.stepCircle,
+                    status === 'active' && styles.stepCircleActive,
+                    status === 'complete' && styles.stepCircleComplete,
+                  ]}
+                >
+                  <Text
+                    variant="labelLarge"
+                    style={[
+                      styles.stepNumber,
+                      (status === 'active' || status === 'complete') && styles.stepNumberActive,
+                    ]}
+                  >
+                    {step.id}
+                  </Text>
+                </View>
+                <Text
+                  variant="labelLarge"
+                  style={[
+                    styles.stepLabel,
+                    status === 'active' && styles.stepLabelActive,
+                    status === 'complete' && styles.stepLabelComplete,
+                  ]}
+                  numberOfLines={1}
+                >
+                  {step.label}
+                </Text>
+              </View>
+              {index < stepsMeta.length - 1 ? (
+                <View
+                  style={[
+                    styles.stepLine,
+                    (currentStep > step.id || status === 'complete') && styles.stepLineActive,
+                  ]}
+                />
+              ) : null}
+            </React.Fragment>
+          );
+        })}
+      </View>
+    </ScrollView>
+  );
+
   return (
     <ScrollView contentContainerStyle={layout.scrollContent} style={layout.screen}>
-      <CustomHeader
-        label={translate('Subsidy eligibility')}
-        subheading={translate('Tell us about your site and we’ll surface the best-matched programmes.')}
-        image_url="https://i.postimg.cc/CLkyNwZT/Screenshot-2025-11-10-at-5-03-23-PM.png"
-      />
+      <View style={styles.heroWrapper}>
+        <LinearGradient
+          colors={[colors.palette.indigo900, colors.palette.indigo600]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.heroGradient}
+        >
+          <View style={styles.heroContent}>
+            <Text variant="headlineSmall" style={styles.heroTitle}>
+              {translate('Unlock your solar subsidy')}
+            </Text>
+            <Text variant="bodyMedium" style={styles.heroSubtitle}>
+              {translate('Take three quick steps to size your system, preview savings, and match the best programmes for your rooftop.')}
+            </Text>
+            <View style={styles.heroStats}>
+              <View style={styles.heroStat}>
+                <Text style={styles.heroStatNumber}>3</Text>
+                <Text style={styles.heroStatLabel}>{translate('guided steps')}</Text>
+              </View>
+              <View style={styles.heroStat}>
+                <Text style={styles.heroStatNumber}>12+</Text>
+                <Text style={styles.heroStatLabel}>{translate('schemes compared')}</Text>
+              </View>
+              <View style={styles.heroStat}>
+                <Text style={styles.heroStatNumber}>₹</Text>
+                <Text style={styles.heroStatLabel}>{translate('personalised savings')}</Text>
+              </View>
+            </View>
+          </View>
+        </LinearGradient>
+      </View>
 
       <View style={[layout.formCard, styles.formCard]}>
         <CustomJuniorHeader label={translate('Eligibility journey')} />
+        {renderStepper()}
+        <View
+          style={styles.progressBarTrack}
+          onLayout={event => setProgressTrackWidth(event.nativeEvent.layout.width)}
+        >
+          <Animated.View
+            style={[
+              styles.progressBarFill,
+              progressTrackWidth
+                ? {
+                    width: progressAnim.current.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, progressTrackWidth],
+                    }),
+                  }
+                : { width: 0 },
+            ]}
+          />
+        </View>
         <Text variant="labelLarge" style={styles.stepIndicator}>
-          {`${translate('Step')} ${currentStep} ${translate('of')} 3`}
+          {`${translate('Step')} ${currentStep} ${translate('of')} ${stepsMeta.length}`}
         </Text>
 
         {currentStep === 1 && (
@@ -250,37 +370,61 @@ const SubsidyEligibilityScreen = ({ navigation }) => {
               {translate('Great! Now tell us a bit about your site so we can match regional incentives.')}
             </Text>
 
-            <AppTextInput label={translate('State')} value={state} onChangeText={setState} />
+            <AppSelect
+              label={translate('State')}
+              value={state}
+              onSelect={setState}
+              options={INDIAN_STATES}
+              placeholder={translate('Select state / union territory')}
+            />
 
             <View style={styles.group}>
               <Text variant="labelLarge" style={styles.groupLabel}>
                 {translate('Consumer type')}
               </Text>
-              <RadioButton.Group onValueChange={v => setConsumerSegment(v as typeof consumerSegment)} value={consumerSegment}>
-                <RadioButton.Item label={translate('Residential')} value="residential" />
-                <RadioButton.Item label={translate('Agricultural')} value="agricultural" />
-                <RadioButton.Item label={translate('Community / cooperative')} value="community" />
-              </RadioButton.Group>
+              <SegmentedButtons
+                value={consumerSegment}
+                onValueChange={val => setConsumerSegment(val as typeof consumerSegment)}
+                buttons={[
+                  { value: 'residential', label: translate('Residential') },
+                  { value: 'agricultural', label: translate('Agricultural') },
+                  { value: 'community', label: translate('Community / cooperative') },
+                ]}
+                density="small"
+                style={styles.segmented}
+              />
             </View>
 
             <View style={styles.group}>
               <Text variant="labelLarge" style={styles.groupLabel}>
                 {translate('Do you own the property?')}
               </Text>
-              <RadioButton.Group onValueChange={v => setOwnership(v)} value={ownership}>
-                <RadioButton.Item label={translate('Yes')} value="yes" />
-                <RadioButton.Item label={translate('No')} value="no" />
-              </RadioButton.Group>
+              <SegmentedButtons
+                value={ownership}
+                onValueChange={setOwnership}
+                buttons={[
+                  { value: 'yes', label: translate('Yes') },
+                  { value: 'no', label: translate('No') },
+                ]}
+                density="small"
+                style={styles.segmented}
+              />
             </View>
 
             <View style={styles.group}>
               <Text variant="labelLarge" style={styles.groupLabel}>
                 {translate('Do you have an existing grid connection?')}
               </Text>
-              <RadioButton.Group onValueChange={v => setGridConnection(v as typeof gridConnection)} value={gridConnection}>
-                <RadioButton.Item label={translate('Yes, grid-connected')} value="grid" />
-                <RadioButton.Item label={translate('No, off-grid / unreliable grid')} value="off-grid" />
-              </RadioButton.Group>
+              <SegmentedButtons
+                value={gridConnection}
+                onValueChange={val => setGridConnection(val as typeof gridConnection)}
+                buttons={[
+                  { value: 'grid', label: translate('Grid-connected') },
+                  { value: 'off-grid', label: translate('Off-grid / unreliable') },
+                ]}
+                density="small"
+                style={styles.segmented}
+              />
             </View>
 
             <AppTextInput label={translate('Roof type (concrete / tin / tiles)')} value={roofType} onChangeText={setRoofType} />
@@ -300,57 +444,217 @@ export default SubsidyEligibilityScreen;
 
 const styles = StyleSheet.create({
   formCard: {
-    gap: 20,
+    gap: spacing.xl,
+  },
+  heroWrapper: {
+    width: '100%',
+    maxWidth: 480,
+    borderRadius: radii.xl,
+    overflow: 'hidden',
+    ...shadows.card,
+  },
+  heroGradient: {
+    padding: spacing.xl,
+  },
+  heroContent: {
+    gap: spacing.sm,
+  },
+  heroTitle: {
+    color: colors.card,
+    fontWeight: '700',
+  },
+  heroSubtitle: {
+    color: 'rgba(248, 250, 252, 0.88)',
+    lineHeight: 22,
+  },
+  heroStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    marginTop: spacing.sm,
+  },
+  heroStat: {
+    backgroundColor: 'rgba(15, 23, 42, 0.28)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radii.pill,
+  },
+  heroStatNumber: {
+    color: colors.card,
+    fontWeight: '700',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  heroStatLabel: {
+    color: 'rgba(226, 232, 240, 0.88)',
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  stepper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingRight: spacing.lg,
+  },
+  stepItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  stepCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: radii.pill,
+    borderWidth: 2,
+    borderColor: colors.border,
+    backgroundColor: colors.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepCircleActive: {
+    borderColor: colors.primary,
+    backgroundColor: 'rgba(37, 99, 235, 0.12)',
+  },
+  stepCircleComplete: {
+    borderColor: colors.success,
+    backgroundColor: 'rgba(34, 197, 94, 0.14)',
+  },
+  stepNumber: {
+    color: colors.secondaryText,
+  },
+  stepNumberActive: {
+    color: colors.primary,
+    fontWeight: '700',
+  },
+  stepLabel: {
+    color: colors.secondaryText,
+    maxWidth: 180,
+  },
+  stepLabelActive: {
+    color: colors.primaryText,
+    fontWeight: '600',
+  },
+  stepLabelComplete: {
+    color: colors.success,
+  },
+  stepLine: {
+    height: 2,
+    width: 28,
+    backgroundColor: colors.borderMuted,
+    borderRadius: radii.pill,
+  },
+  stepLineActive: {
+    backgroundColor: colors.primary,
+  },
+  progressBarTrack: {
+    width: '100%',
+    height: 8,
+    borderRadius: radii.pill,
+    backgroundColor: colors.borderMuted,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: colors.primary,
   },
   stepIndicator: {
-    color: '#475569',
+    color: colors.secondaryText,
   },
   introText: {
-    color: '#0F172A',
+    color: colors.primaryText,
   },
   congratsCard: {
-    gap: 16,
+    gap: spacing.sm,
     alignItems: 'flex-start',
+    backgroundColor: colors.subtle,
+    borderRadius: radii.lg,
+    padding: spacing.md,
   },
   congratsTitle: {
-    color: '#047857',
+    color: colors.success,
     fontWeight: '700',
   },
   congratsBody: {
-    color: '#0F172A',
+    color: colors.primaryText,
   },
   group: {
-    backgroundColor: 'rgba(226, 232, 240, 0.25)',
-    borderRadius: 18,
-    padding: 16,
-    gap: 8,
+    backgroundColor: colors.cardAlt,
+    borderRadius: radii.md,
+    padding: spacing.md,
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.borderMuted,
   },
   groupLabel: {
-    color: '#0F172A',
+    color: colors.primaryText,
   },
   highlightBox: {
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
-    borderRadius: 18,
-    padding: 20,
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
+    borderRadius: radii.lg,
+    padding: spacing.md,
     alignSelf: 'stretch',
     alignItems: 'center',
-    gap: 6,
+    gap: spacing.xs,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.18)',
   },
   highlightLabel: {
     textTransform: 'uppercase',
     letterSpacing: 1,
-    color: '#047857',
+    color: colors.info,
   },
   highlightValue: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '700',
-    color: '#0F172A',
+    color: colors.primaryText,
   },
   highlightHint: {
-    color: '#334155',
+    color: colors.tertiaryText,
     fontSize: 13,
   },
   highlightSavings: {
-    color: '#047857',
+    color: colors.success,
+  },
+  segmented: {
+    marginTop: spacing.xs,
   },
 });
+
+const INDIAN_STATES = [
+  'Andhra Pradesh',
+  'Arunachal Pradesh',
+  'Assam',
+  'Bihar',
+  'Chhattisgarh',
+  'Goa',
+  'Gujarat',
+  'Haryana',
+  'Himachal Pradesh',
+  'Jharkhand',
+  'Karnataka',
+  'Kerala',
+  'Madhya Pradesh',
+  'Maharashtra',
+  'Manipur',
+  'Meghalaya',
+  'Mizoram',
+  'Nagaland',
+  'Odisha',
+  'Punjab',
+  'Rajasthan',
+  'Sikkim',
+  'Tamil Nadu',
+  'Telangana',
+  'Tripura',
+  'Uttar Pradesh',
+  'Uttarakhand',
+  'West Bengal',
+  'Andaman and Nicobar Islands',
+  'Chandigarh',
+  'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi',
+  'Jammu and Kashmir',
+  'Ladakh',
+  'Lakshadweep',
+  'Puducherry',
+];
